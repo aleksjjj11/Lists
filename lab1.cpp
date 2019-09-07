@@ -98,8 +98,20 @@ int menu(List *list){
         }
         else return 0; //Иначе, что НУЛ
     }
-    case 5:
-        break;
+    case 5: {
+        int index;
+        ListItem *result = NULL;
+        printList(list);
+        cout << "Enter index for removing: ";
+        cin >> index;
+        result = getPointerByIndex(list, index);
+        if (result == NULL) return 0;
+        
+        cout << "Deleted pointer - " << result << endl;
+        deleteItem(list, index);
+        getchar(); getchar();
+        return 1;
+    }
     case 6: {
         int index;
         ListItem *result = NULL;
@@ -221,4 +233,9 @@ ListItem* removeItem(List *list, int index) {
     item->prev->next = item->next;
     item->next->prev = item->prev;
     return item;
+}
+
+int deleteItem(List *list, int index) {
+    delete(removeItem(list, index));
+    return 1;
 }
