@@ -19,7 +19,7 @@ int countList(List *list);
 int getIndexByPointer(List *list, ListItem *search);
 ListItem* getPointerByIndex(List *list, int index);
 int deleteItem(List *list, int index);
-ListItem* remove(List *list, int index);
+ListItem* removeItem(List *list, int index);
 int clearList(List *list);
 int insertItem(List *list, ListItem *item, int index);
 
@@ -100,8 +100,19 @@ int menu(List *list){
     }
     case 5:
         break;
-    case 6:
-        break;
+    case 6: {
+        int index;
+        ListItem *result = NULL;
+        printList(list);
+        cout << "Enter index for removing: ";
+        cin >> index;
+        result = removeItem(list, index);
+        if (result == NULL) return 0;
+        
+        cout << "Removed pointer - " << result << endl;
+        getchar(); getchar();
+        return 1;
+    }
     case 7:
         break;
     case 8:
@@ -187,4 +198,27 @@ ListItem* getPointerByIndex(List *list, int index) {
         med = med->next;
     }
     return med;
+}
+
+ListItem* removeItem(List *list, int index) {
+    if (list == NULL) return NULL;
+    if (index < 0 || index > countList(list)) return NULL;
+
+    ListItem *item = getPointerByIndex(list, index);
+    if (item == NULL) return NULL;
+
+    if (item == list->head) {
+        list->head = item->next;
+        item->next->prev = NULL;
+        return item;        
+    }
+    if (item == list->tail) {
+        list->tail = item->prev;
+        item->prev->next = NULL;
+        return item;
+    }
+
+    item->prev->next = item->next;
+    item->next->prev = item->prev;
+    return item;
 }
