@@ -85,8 +85,19 @@ int menu(List *list){
         getchar(); getchar();
         return result;
     }
-    case 4:
-        break;
+    case 4: {
+        int indexSearch = 0;
+        ListItem *itemSearch = NULL;
+        cout << "Enter index: ";
+        cin >> indexSearch;
+        itemSearch = getPointerByIndex(list, indexSearch);
+        if (itemSearch) {
+            cout << "Found pointer: " << itemSearch << endl;
+            getchar(); getchar();
+            return 1; //Если не НУЛ, то возвращаем, что успешно
+        }
+        else return 0; //Иначе, что НУЛ
+    }
     case 5:
         break;
     case 6:
@@ -170,7 +181,10 @@ ListItem* getPointerByIndex(List *list, int index) {
     if (list == NULL) return NULL;
     if (index < 0 || index > countList(list)) return NULL;
     int i = 0;
-    while (i < index) {
-        
+    ListItem *med = list->head;
+    while (i < index && med != NULL) {
+        i++;
+        med = med->next;
     }
+    return med;
 }
