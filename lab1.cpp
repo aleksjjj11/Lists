@@ -125,10 +125,33 @@ int menu(List *list){
         getchar(); getchar();
         return 1;
     }
-    case 7:
-        break;
-    case 8:
-        break; 
+    case 7: {
+        if (clearList(list) == 1) {
+            cout << "List was deleted." << endl;
+            getchar(); getchar();
+            return 1;
+        } else {
+            cout << "Attempt to delete null pointer." << endl;
+            getchar(); getchar();
+            return 0;
+        }
+    }
+    case 8: {
+        ListItem *itemLoc = new ListItem;
+        int position = 0;
+        cout << "Enter position for inserting: ";
+        cin >> position;
+        cout << "Inserting list item: " << itemLoc << endl;
+        if (insertItem(list, itemLoc, position) == 0) {
+            cout << "Attempt to insert null pointer." << endl;
+            getchar(); getchar();
+            return 0;
+        }
+
+        cout << "Pointer " << itemLoc << " was successfully inserted." << endl;
+        getchar(); getchar(); 
+        return 1;
+    }
     case 9:
         printList(list);
         break;
@@ -237,5 +260,36 @@ ListItem* removeItem(List *list, int index) {
 
 int deleteItem(List *list, int index) {
     delete(removeItem(list, index));
+    return 1;
+}
+
+int clearList(List *list) {
+    if (list == NULL || list->head == NULL) return 0;
+    delete(list);
+    return 1;
+}
+int insertItem(List *list, ListItem *item, int index) {
+    ListItem *pointer = getPointerByIndex(list, index);
+    if (pointer == NULL) return 0;
+
+    if (pointer == list->head) {
+        list->head = item;
+
+        pointer->prev = item;
+        item->next = pointer;
+        item->prev = NULL;
+        return 1;
+    }
+
+    // if (pointer == list->tail) {
+        
+    // }
+
+    item->prev = pointer->prev;
+    item->next = pointer;
+
+    pointer->prev->next = item;
+    pointer->prev = item;
+
     return 1;
 }
