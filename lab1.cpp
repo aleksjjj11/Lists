@@ -1,39 +1,6 @@
-#include <iostream>
-#include <locale.h>
+#include "lab1.h"
 
 using namespace std;
-
-struct ListItem{
-    ListItem *prev = NULL;
-    ListItem *next = NULL;    
-};
-
-struct List {
-    ListItem *head = NULL;
-    ListItem *tail = NULL;
-};
-//возвращаемое значение нужно для отладки
-int addItem(List *list, ListItem *item);
-void printList(List *list);
-int countList(List *list);
-int getIndexByPointer(List *list, ListItem *search);
-ListItem* getPointerByIndex(List *list, int index);
-int deleteItem(List *list, int index);
-ListItem* removeItem(List *list, int index);
-int clearList(List *list);
-int insertItem(List *list, ListItem *item, int index);
-
-int menu(List *list);
-
-int main(){
-    setlocale(LC_CTYPE, "rus");
-    int result = 0;
-    List *listLoc = new List;
-    do 
-        result = menu(listLoc); 
-    while (result > 0);
-    return 0;
-}
 
 int menu(List *list){
     int chooseAction = 0;
@@ -55,8 +22,7 @@ int menu(List *list){
             << "9. Print all list" << endl
             << "0. Exit" << endl;
         cin >> chooseAction;
-    }
-    while (chooseAction < 0 || chooseAction > 9);
+    } while (chooseAction < 0 || chooseAction > 9);
     switch (chooseAction)
     {
     case 0:
@@ -65,29 +31,31 @@ int menu(List *list){
     case 1: {
         ListItem *itemLoc = new ListItem;
         return addItem(list, itemLoc);
-        //break;
     }
     case 2: {
         int count = countList(list);
         cout << "Count list = " << count << endl;
+        cout << "Press any key for contien" << endl;
         getchar(); getchar();
         return 1;
-        //break;
     }
     case 3:{
         ListItem *itemLoc;
+        printList(list);
         scanf("%p", &itemLoc);
         int result = getIndexByPointer(list, itemLoc);
         if (result > 0)
             cout << "Index = " << result;
         else 
             cout << "Error: " << result;
+        cout << "Press any key for contien" << endl;
         getchar(); getchar();
         return result;
     }
     case 4: {
         int indexSearch = 0;
         ListItem *itemSearch = NULL;
+        printList(list);
         cout << "Enter index: ";
         cin >> indexSearch;
         itemSearch = getPointerByIndex(list, indexSearch);
@@ -109,7 +77,7 @@ int menu(List *list){
         
         cout << "Deleted pointer - " << result << endl;
         deleteItem(list, index);
-        getchar(); getchar();
+        printList(list);
         return 1;
     }
     case 6: {
@@ -122,7 +90,7 @@ int menu(List *list){
         if (result == NULL) return 0;
         
         cout << "Removed pointer - " << result << endl;
-        getchar(); getchar();
+        printList(list);
         return 1;
     }
     case 7: {
@@ -132,6 +100,7 @@ int menu(List *list){
             return 1;
         } else {
             cout << "Attempt to delete null pointer." << endl;
+            cout << "Press any key for contien" << endl;
             getchar(); getchar();
             return 0;
         }
@@ -139,17 +108,16 @@ int menu(List *list){
     case 8: {
         ListItem *itemLoc = new ListItem;
         int position = 0;
+        printList(list);
         cout << "Enter position for inserting: ";
         cin >> position;
         cout << "Inserting list item: " << itemLoc << endl;
         if (insertItem(list, itemLoc, position) == 0) {
             cout << "Attempt to insert null pointer." << endl;
+            cout << "Press any key for contien" << endl;
             getchar(); getchar();
             return 0;
         }
-
-        cout << "Pointer " << itemLoc << " was successfully inserted." << endl;
-        getchar(); getchar(); 
         return 1;
     }
     case 9:
@@ -168,21 +136,23 @@ int addItem(List *list, ListItem *item) {
     if (list->head == NULL) {
         list->head = item;
         list->tail = item;
+        item->prev = NULL;
     } else {
         item->prev = list->tail;
         list->tail->next = item;
 
-        item->next = NULL;
         list->tail = item;
     }
+        item->next = NULL;
     printf("Added list item %p\n", item);
-    getchar(); getchar();
+    printList(list);
     return 1;
 }
 
 void printList(List *list) {
     if (list == NULL || list->head == NULL) {
         cout << "List empty." << endl; 
+        cout << "Press any key for contien" << endl;
         getchar(); getchar();
         return;
     }
@@ -190,10 +160,11 @@ void printList(List *list) {
     ListItem *med = list->head;
     int i = 0;
     do {
-        printf("%i. %p\n", i, med);
+        printf("%i.\t\t\t%4p\t\t\t%4p\t\t\t%4p\n", i, med->prev, med, med->next);
         med = med->next;
         i++;
     } while (med != NULL);
+    cout << "Press any key for contien" << endl;
     getchar(); getchar();
 }
 
@@ -231,7 +202,7 @@ ListItem* getPointerByIndex(List *list, int index) {
     while (i < index && med != NULL) {
         i++;
         med = med->next;
-    }
+    }   
     return med;
 }
 
@@ -241,6 +212,12 @@ ListItem* removeItem(List *list, int index) {
 
     ListItem *item = getPointerByIndex(list, index);
     if (item == NULL) return NULL;
+
+    if (countList(list) == 1) {
+        list->head = NULL;
+        list->tail = NULL;
+        return item;
+    }
 
     if (item == list->head) {
         list->head = item->next;
@@ -259,7 +236,7 @@ ListItem* removeItem(List *list, int index) {
 }
 
 int deleteItem(List *list, int index) {
-    delete(removeItem(list, index));
+    delete removeItem(list, index);
     return 1;
 }
 
@@ -268,8 +245,16 @@ int clearList(List *list) {
     delete(list);
     return 1;
 }
+
 int insertItem(List *list, ListItem *item, int index) {
+
+    if (index >= countList(list)){
+        addItem(list,item);
+        return 1;
+    }
+
     ListItem *pointer = getPointerByIndex(list, index);
+
     if (pointer == NULL) return 0;
 
     if (pointer == list->head) {
@@ -278,18 +263,17 @@ int insertItem(List *list, ListItem *item, int index) {
         pointer->prev = item;
         item->next = pointer;
         item->prev = NULL;
+        cout << "Pointer " << item << " was successfully inserted." << endl;
+        printList(list);
         return 1;
     }
-
-    // if (pointer == list->tail) {
-        
-    // }
 
     item->prev = pointer->prev;
     item->next = pointer;
 
     pointer->prev->next = item;
     pointer->prev = item;
-
+    cout << "Pointer " << item << " was successfully inserted." << endl;
+    printList(list);
     return 1;
 }
