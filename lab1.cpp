@@ -44,7 +44,9 @@ int menu(List *list){
         printList(list);
         scanf("%p", &itemLoc);
         int result = getIndexByPointer(list, itemLoc);
-        if (result > 0)
+        // cout << "Result: " << result << endl;
+        // getchar();
+        if (result > -1)
             cout << "Index = " << result;
         else 
             cout << "Error: " << result;
@@ -164,8 +166,8 @@ void printList(List *list) {
         med = med->next;
         i++;
     } while (med != NULL);
-    cout << "Press any key for contien" << endl;
-    getchar(); getchar();
+    //cout << "Press any key for contien" << endl;
+    //sgetchar(); getchar();
 }
 
 int countList(List *list) {
@@ -185,16 +187,15 @@ int getIndexByPointer(List *list, ListItem *search) {
     if (list == NULL) return -1;
     if (search == NULL) return -2;
     ListItem *med = list->head;
-    int index = 0, count = countList(list);
-    while(index < count && search != med) {
-        index++;
+    int count = countList(list);
+    for(int index = 0; med; index++) {
+        if (med == search) return index;
         med = med->next;
     }
-    if (index >= count) return -3;
-    return index;
+    return -3;
 }
 
-ListItem* getPointerByIndex(List *list, int index) {
+ListItem* getPointerByIndex(List *list, int index = 0) {
     if (list == NULL) return NULL;
     if (index < 0 || index > countList(list)) return NULL;
     int i = 0;

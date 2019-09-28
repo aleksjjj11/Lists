@@ -16,7 +16,7 @@ int addItem(List *list, ListItem *item);
 void printList(List *list);
 int countList(List *list);
 int getIndexByPointer(List *list, ListItem *search);
-ListItem* getPointerByIndex(List *list, int index);
+ListItem* getPointerByIndex(List *list, int index = 0);
 int deleteItem(List *list, int index);
 ListItem* removeItem(List *list, int index);
 int clearList(List *list);
