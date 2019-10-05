@@ -29,7 +29,7 @@ int menu(List *list){
         exit(0);
         break;
     case 1: {
-        ListItem *itemLoc = new ListItem;
+        CD *itemLoc = new CD;
         return addItem(list, itemLoc);
     }
     case 2: {
@@ -40,7 +40,7 @@ int menu(List *list){
         return 1;
     }
     case 3:{
-        ListItem *itemLoc;
+        CD *itemLoc;
         printList(list);
         scanf("%p", &itemLoc);
         int result = getIndexByPointer(list, itemLoc);
@@ -56,7 +56,7 @@ int menu(List *list){
     }
     case 4: {
         int indexSearch = 0;
-        ListItem *itemSearch = NULL;
+        CD *itemSearch = NULL;
         printList(list);
         cout << "Enter index: ";
         cin >> indexSearch;
@@ -70,7 +70,7 @@ int menu(List *list){
     }
     case 5: {
         int index;
-        ListItem *result = NULL;
+        CD *result = NULL;
         printList(list);
         cout << "Enter index for removing: ";
         cin >> index;
@@ -84,7 +84,7 @@ int menu(List *list){
     }
     case 6: {
         int index;
-        ListItem *result = NULL;
+        CD *result = NULL;
         printList(list);
         cout << "Enter index for removing: ";
         cin >> index;
@@ -108,7 +108,7 @@ int menu(List *list){
         }
     }
     case 8: {
-        ListItem *itemLoc = new ListItem;
+        CD *itemLoc = new CD;
         int position = 0;
         printList(list);
         cout << "Enter position for inserting: ";
@@ -131,7 +131,7 @@ int menu(List *list){
     return 1;
 }
 
-int addItem(List *list, ListItem *item) {
+int addItem(List *list, CD *item) {
     if (list == NULL) return -1;
     if (item == NULL) return -2;
     
@@ -159,7 +159,7 @@ void printList(List *list) {
         return;
     }
     //printItem(list->head);
-    ListItem *med = list->head;
+    CD *med = list->head;
     int i = 0;
     do {
         printf("%i.\t\t\t%4p\t\t\t%4p\t\t\t%4p\n", i, med->prev, med, med->next);
@@ -175,7 +175,7 @@ int countList(List *list) {
         return 0;
     }
     int count = 0;
-    ListItem *med = list->head;
+    CD *med = list->head;
     do {
         count++;
         med = med->next;
@@ -183,10 +183,10 @@ int countList(List *list) {
     return count;
 }
 
-int getIndexByPointer(List *list, ListItem *search) {
+int getIndexByPointer(List *list, CD *search) {
     if (list == NULL) return -1;
     if (search == NULL) return -2;
-    ListItem *med = list->head;
+    CD *med = list->head;
     int count = countList(list);
     for(int index = 0; med; index++) {
         if (med == search) return index;
@@ -195,11 +195,11 @@ int getIndexByPointer(List *list, ListItem *search) {
     return -3;
 }
 
-ListItem* getPointerByIndex(List *list, int index = 0) {
+CD* getPointerByIndex(List *list, int index = 0) {
     if (list == NULL) return NULL;
     if (index < 0 || index > countList(list)) return NULL;
     int i = 0;
-    ListItem *med = list->head;
+    CD *med = list->head;
     while (i < index && med != NULL) {
         i++;
         med = med->next;
@@ -207,11 +207,11 @@ ListItem* getPointerByIndex(List *list, int index = 0) {
     return med;
 }
 
-ListItem* removeItem(List *list, int index) {
+CD* removeItem(List *list, int index) {
     if (list == NULL) return NULL;
     if (index < 0 || index > countList(list)) return NULL;
 
-    ListItem *item = getPointerByIndex(list, index);
+    CD *item = getPointerByIndex(list, index);
     if (item == NULL) return NULL;
 
     if (countList(list) == 1) {
@@ -247,14 +247,14 @@ int clearList(List *list) {
     return 1;
 }
 
-int insertItem(List *list, ListItem *item, int index) {
+int insertItem(List *list, CD *item, int index) {
 
     if (index >= countList(list)){
         addItem(list,item);
         return 1;
     }
 
-    ListItem *pointer = getPointerByIndex(list, index);
+    CD *pointer = getPointerByIndex(list, index);
 
     if (pointer == NULL) return 0;
 
