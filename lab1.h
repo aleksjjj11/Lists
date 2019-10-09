@@ -1,11 +1,12 @@
 #include <iostream>
 #include <locale.h>
-#include <string.h>
+#include <string>
 //Вариант 3 
 struct CD {
     CD *prev = NULL;
     CD *next = NULL;
-    string title = NULL;
+    std::string type = "";
+    std::string title = "";
     long totalMemory = 0;
     long inuseMemory = 0;
     bool isAppending = false;
@@ -17,13 +18,13 @@ struct DataCD : CD {};
 
 struct AudioCD : CD {
     long duration = 0;
-    string artist = NULL;
+    std::string artist = "";
 };
 
 struct MP3CD : AudioCD {};
 
 struct VideoCD : CD {
-    string director = NULL;
+    std::string director = "";
     int duration = 0; 
 };
 
@@ -48,9 +49,12 @@ int clearList(List *list);
 int insertItem(List *list, CD *item, int index);
 int menu(List *list);
 //Требуют реализации
+int inputBaseCD(CD &item); //done
+int inputAudioCD(AudioCD &item); //done
+int inputVideoCD(VideoCD &item); //done
 int sortByTitle(List *list);
 int sortByDuration(List *list);
 int sortByInuseMemory(List *list);
-CD *searchByType(List *list, string search);
-CD *searchByAuthor(List *list, string search);
+int searchByType(List *list, std::string search); //done
+int searchByAuthor(List *list, std::string search); //done
 CD *searchBy();//По достаточному количеству свободной памяти

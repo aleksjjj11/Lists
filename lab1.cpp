@@ -2,7 +2,7 @@
 
 using namespace std;
 
-int menu(List *list){
+int menu(List *list) {
     int chooseAction = 0;
     
     do {
@@ -11,25 +11,73 @@ int menu(List *list){
         #else
         system("clear");
         #endif
-        cout << "1. Add item" << endl
-            << "2. Count list" << endl
-            << "3. Get index by pointer" << endl
-            << "4. Get pointer by index" << endl
-            << "5. Delete item" << endl
-            << "6. Remove item" << endl
-            << "7. Clear list" << endl
-            << "8. Insert item" << endl
-            << "9. Print all list" << endl
+        cout << "1.  Add item" << endl
+            << "2.  Count list" << endl
+            << "3.  Get index by pointer" << endl
+            << "4.  Get pointer by index" << endl
+            << "5.  Delete item" << endl
+            << "6.  Remove item" << endl
+            << "7.  Clear list" << endl
+            << "8.  Insert item" << endl
+            << "9.  Print all list" << endl
+            << "10. Searching by type" << endl
+            << "11. Searching by author" << endl
             << "0. Exit" << endl;
         cin >> chooseAction;
-    } while (chooseAction < 0 || chooseAction > 9);
+    } while (chooseAction < 0 || chooseAction > 11);
     switch (chooseAction)
     {
     case 0:
         exit(0);
         break;
     case 1: {
-        CD *itemLoc = new CD;
+        int chooseType = 0;
+        do {
+            rewind(stdin);
+            cout << "Choose type of CD, pls: \n1 - Data\n2 - Audio\n3 - MP3\n4 - Video\n5 - DVD" << endl;
+
+        } while (scanf("%i", &chooseType) != 1 || chooseType > 5 || chooseType < 1);
+
+        CD *itemLoc;
+        switch (chooseType)
+        {
+        case 1: {
+            itemLoc = new DataCD();
+            itemLoc->type = "Data";
+            inputBaseCD(*itemLoc);
+            break;
+        }
+        case 2: {
+            itemLoc = new AudioCD;
+            itemLoc->type = "Audio";
+            inputBaseCD(*itemLoc);
+            inputAudioCD(*((AudioCD *)itemLoc));
+            break;
+        }
+        case 3: {
+            itemLoc = new MP3CD;
+            itemLoc->type = "MP3";
+            inputBaseCD(*itemLoc);
+            inputAudioCD(*((MP3CD *)itemLoc));
+            break;
+        }
+        case 4: {
+            itemLoc = new VideoCD;
+            itemLoc->type = "Video";
+            inputBaseCD(*itemLoc);
+            inputVideoCD(*((VideoCD *)itemLoc));
+            break;
+        }
+        case 5: {
+            itemLoc = new DVD;
+            itemLoc->type = "DVD";
+            inputBaseCD(*itemLoc);
+            inputVideoCD(*((DVD *)itemLoc));
+            break;
+        }
+        default:
+            break;
+        }
         return addItem(list, itemLoc);
     }
     case 2: {
@@ -39,7 +87,7 @@ int menu(List *list){
         getchar(); getchar();
         return 1;
     }
-    case 3:{
+    case 3: {
         CD *itemLoc;
         printList(list);
         scanf("%p", &itemLoc);
@@ -122,9 +170,25 @@ int menu(List *list){
         }
         return 1;
     }
-    case 9:
+    case 9: {
         printList(list);
+        getchar(); getchar();
         break;
+    }
+    case 10: {
+        string type;
+        cout << "Enter type: "; cin >> type;
+        searchByType(list, type);
+        getchar(); getchar();
+        break;
+    }
+    case 11: {
+        string author;
+        cout << "Enter author: "; cin >> author;
+        searchByAuthor(list, author);
+        getchar(); getchar();
+        break;
+    }
     default:
         break;
     }
@@ -195,7 +259,7 @@ int getIndexByPointer(List *list, CD *search) {
     return -3;
 }
 
-CD* getPointerByIndex(List *list, int index = 0) {
+CD* getPointerByIndex(List *list, int index) {
     if (list == NULL) return NULL;
     if (index < 0 || index > countList(list)) return NULL;
     int i = 0;
@@ -276,5 +340,80 @@ int insertItem(List *list, CD *item, int index) {
     pointer->prev = item;
     cout << "Pointer " << item << " was successfully inserted." << endl;
     printList(list);
+    return 1;
+}
+//Input base information about CD
+int inputBaseCD(CD &item) {
+    if (&item == NULL) return -1;
+
+    cout << "Title: "; cin >> item.title;
+    cout << "Total memory: "; cin >> item.totalMemory;
+    cout << "Inuse memory: "; cin >> item.inuseMemory;
+    cout << "Is appending (true[1]/false[0]): "; cin >> item.isAppending;
+    cout << "Is rewriting (true[1]/false[0]): "; cin >> item.isRewriting;
+    return 1;
+}
+
+int inputAudioCD(AudioCD &item) {
+    if (&item == NULL) return -2;
+
+    cout << "Artist: "; cin >> item.artist;
+    cout << "Duration(seconds): "; cin >> item.duration;
+    return 1;
+}
+
+int inputVideoCD(VideoCD &item) {
+    if (&item == NULL) return -2;
+
+    cout << "Director: "; cin >> item.director;
+    cout << "Duration(seconds): "; cin >> item.duration;
+    return 1;
+}
+
+int searchByType(List *list, string search) {
+    if (list == NULL) return -1;
+
+    cout << "Found items: " << endl;
+    int count = 0;
+
+    for (int i = 0; i < countList(list); i++) {
+        CD * item = getPointerByIndex(list, i);
+        if (item->type == search) {
+            printf("Index: %i - %p\n", i, item);
+            count++;
+        }
+    }
+    if (count == 0) cout << "Nothing" << endl;
+    return 1;
+}
+
+int searchByAuthor(List *list, string search) {
+    if (list == NULL) return -1;
+
+    cout << "Found items: " << endl;
+    int count = 0;
+
+    for (int i = 0; i < countList(list); i++) {
+        CD * item = getPointerByIndex(list, i);
+        if (item->type == "Audio" || item->type == "MP3") {
+            if (((AudioCD *)item)->artist == search) {
+                printf("Index: %i - %p type: ", i, item);
+                cout << item->type << endl;
+                count++;
+                continue;
+            }
+        }
+
+        if (item->type == "Video" || item->type == "DVD") {
+            if (((VideoCD *)item)->director == search) {
+                printf("Index: %i - %p type: ", i, item);
+                cout << item->type << endl;
+                count++;
+                continue;
+            }
+        }
+        
+    }
+    if (count == 0) cout << "Nothing" << endl;
     return 1;
 }
