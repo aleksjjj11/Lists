@@ -22,9 +22,11 @@ int menu(List *list) {
             << "9.  Print all list" << endl
             << "10. Searching by type" << endl
             << "11. Searching by author" << endl
+            << "12. Searching by " << endl
+            << "13. Sorting by title" << endl
             << "0. Exit" << endl;
         cin >> chooseAction;
-    } while (chooseAction < 0 || chooseAction > 11);
+    } while (chooseAction < 0 || chooseAction > 13);
     switch (chooseAction)
     {
     case 0:
@@ -189,6 +191,18 @@ int menu(List *list) {
         getchar(); getchar();
         break;
     }
+    case 12: {
+        break;
+    }
+    case 13: {
+        cout << "Before sorting" << endl; 
+        printList(list);
+        sortByTitle(list);
+        cout << endl << "After sorting" << endl;
+        printList(list);
+        getchar(); getchar();
+        break;
+    }
     default:
         break;
     }
@@ -227,6 +241,7 @@ void printList(List *list) {
     int i = 0;
     do {
         printf("%i.\t\t\t%4p\t\t\t%4p\t\t\t%4p\n", i, med->prev, med, med->next);
+        // cout << "\t\t\t" << med->prev->title << "\t\t\t" << med->title << "\t\t\t" << med->next->title << endl; 
         med = med->next;
         i++;
     } while (med != NULL);
@@ -415,5 +430,38 @@ int searchByAuthor(List *list, string search) {
         
     }
     if (count == 0) cout << "Nothing" << endl;
+    return 1;
+}
+
+int sortByTitle(List *list) {
+    if (list == NULL) return -1;
+    for (int j = 0; j < countList(list); j++) {
+        for (int i = 0; i < countList(list) - 1; i++) {
+            CD *thisItem = getPointerByIndex(list, i);
+            CD *nextItem = getPointerByIndex(list, i+1);
+            //If next item nearer than this than change their positions
+            if (thisItem->title.compare(nextItem->title) > 0) {
+                changeNeighbor(*thisItem, *nextItem);
+
+                if (i == 0) list->head = nextItem;
+                if (i == countList(list) - 1) list->tail = thisItem;
+            }
+        }
+    }
+    return 0;
+}
+
+int changeNeighbor(CD &thisItem, CD &nextItem) {
+    CD *med = nextItem.next;
+    nextItem.next = &thisItem;
+    thisItem.next = med;
+
+    med = thisItem.prev;
+    thisItem.prev = &nextItem;
+    nextItem.prev = med;
+
+    if (thisItem.next != NULL) thisItem.next->prev = &thisItem;
+    if (nextItem.prev != NULL) nextItem.prev->next = &nextItem;
+
     return 1;
 }

@@ -58,3 +58,5 @@ int sortByInuseMemory(List *list);
 int searchByType(List *list, std::string search); //done
 int searchByAuthor(List *list, std::string search); //done
 CD *searchBy();//По достаточному количеству свободной памяти
+//For help
+int changeNeighbor(CD &thisItem, CD &nextItem);
