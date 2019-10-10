@@ -16,19 +16,18 @@ struct CD {
 };
 struct DataCD : CD {};
 
-struct AudioCD : CD {
+struct PlayCD : CD {
     long duration = 0;
-    std::string artist = "";
+    std::string author = "";
 };
 
-struct MP3CD : AudioCD {};
+struct AudioCD : PlayCD {};
 
-struct VideoCD : CD {
-    std::string director = "";
-    int duration = 0; 
-};
+struct MP3CD : PlayCD {};
 
-struct DVD : VideoCD {
+struct VideoCD : PlayCD {};
+
+struct DVD : PlayCD {
     int numSections = 1;
 };
 
@@ -50,9 +49,8 @@ int insertItem(List *list, CD *item, int index);
 int menu(List *list);
 //Требуют реализации
 int inputBaseCD(CD &item); //done
-int inputAudioCD(AudioCD &item); //done
-int inputVideoCD(VideoCD &item); //done
-int sortByTitle(List *list);
+int inputPlayCD(PlayCD &item); //done
+int sortByTitle(List *list); //done
 int sortByDuration(List *list);
 int sortByInuseMemory(List *list);
 int searchByType(List *list, std::string search); //done

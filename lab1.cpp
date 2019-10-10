@@ -24,9 +24,10 @@ int menu(List *list) {
             << "11. Searching by author" << endl
             << "12. Searching by " << endl
             << "13. Sorting by title" << endl
+            << "14. Sorting by duration" << endl
             << "0. Exit" << endl;
         cin >> chooseAction;
-    } while (chooseAction < 0 || chooseAction > 13);
+    } while (chooseAction < 0 || chooseAction > 14);
     switch (chooseAction)
     {
     case 0:
@@ -53,28 +54,30 @@ int menu(List *list) {
             itemLoc = new AudioCD;
             itemLoc->type = "Audio";
             inputBaseCD(*itemLoc);
-            inputAudioCD(*((AudioCD *)itemLoc));
+            inputPlayCD(*((PlayCD *)itemLoc));
             break;
         }
         case 3: {
             itemLoc = new MP3CD;
             itemLoc->type = "MP3";
             inputBaseCD(*itemLoc);
-            inputAudioCD(*((MP3CD *)itemLoc));
+            inputPlayCD(*((PlayCD *)itemLoc));
             break;
         }
         case 4: {
             itemLoc = new VideoCD;
             itemLoc->type = "Video";
             inputBaseCD(*itemLoc);
-            inputVideoCD(*((VideoCD *)itemLoc));
+            inputPlayCD(*((PlayCD *)itemLoc));
             break;
         }
         case 5: {
             itemLoc = new DVD;
             itemLoc->type = "DVD";
             inputBaseCD(*itemLoc);
-            inputVideoCD(*((DVD *)itemLoc));
+            inputPlayCD(*((PlayCD *)itemLoc));
+            cout << "Enter amount sections: "; 
+            cin >> itemLoc->numSections;
             break;
         }
         default:
@@ -198,6 +201,15 @@ int menu(List *list) {
         cout << "Before sorting" << endl; 
         printList(list);
         sortByTitle(list);
+        cout << endl << "After sorting" << endl;
+        printList(list);
+        getchar(); getchar();
+        break;
+    }
+    case 14: {
+        cout << "Before sorting" << endl; 
+        printList(list);
+        sortByDuration(list);
         cout << endl << "After sorting" << endl;
         printList(list);
         getchar(); getchar();
@@ -369,19 +381,13 @@ int inputBaseCD(CD &item) {
     return 1;
 }
 
-int inputAudioCD(AudioCD &item) {
+int inputPlayCD(PlayCD &item) {
     if (&item == NULL) return -2;
 
-    cout << "Artist: "; cin >> item.artist;
-    cout << "Duration(seconds): "; cin >> item.duration;
-    return 1;
-}
-
-int inputVideoCD(VideoCD &item) {
-    if (&item == NULL) return -2;
-
-    cout << "Director: "; cin >> item.director;
-    cout << "Duration(seconds): "; cin >> item.duration;
+    cout << "Author: "; 
+    cin >> item.author;
+    cout << "Duration(seconds): "; 
+    cin >> item.duration;
     return 1;
 }
 
@@ -410,17 +416,25 @@ int searchByAuthor(List *list, string search) {
 
     for (int i = 0; i < countList(list); i++) {
         CD * item = getPointerByIndex(list, i);
-        if (item->type == "Audio" || item->type == "MP3") {
-            if (((AudioCD *)item)->artist == search) {
-                printf("Index: %i - %p type: ", i, item);
-                cout << item->type << endl;
-                count++;
-                continue;
-            }
-        }
+        // if (item->type == "Audio" || item->type == "MP3") {
+        //     if (((AudioCD *)item)->author == search) {
+        //         printf("Index: %i - %p type: ", i, item);
+        //         cout << item->type << endl;
+        //         count++;
+        //         continue;
+        //     }
+        // }
 
-        if (item->type == "Video" || item->type == "DVD") {
-            if (((VideoCD *)item)->director == search) {
+        // if (item->type == "Video" || item->type == "DVD") {
+        //     if (((VideoCD *)item)->author == search) {
+        //         printf("Index: %i - %p type: ", i, item);
+        //         cout << item->type << endl;
+        //         count++;
+        //         continue;
+        //     }
+        // }
+        if (item->type == "Video" || item->type == "DVD" || item->type == "Audio" || item->type == "MP3") {
+            if (((PlayCD *)item)->author == search) {
                 printf("Index: %i - %p type: ", i, item);
                 cout << item->type << endl;
                 count++;
@@ -430,6 +444,21 @@ int searchByAuthor(List *list, string search) {
         
     }
     if (count == 0) cout << "Nothing" << endl;
+    return 1;
+}
+
+int changeNeighbor(CD &thisItem, CD &nextItem) {
+    CD *med = nextItem.next;
+    nextItem.next = &thisItem;
+    thisItem.next = med;
+
+    med = thisItem.prev;
+    thisItem.prev = &nextItem;
+    nextItem.prev = med;
+
+    if (thisItem.next != NULL) thisItem.next->prev = &thisItem;
+    if (nextItem.prev != NULL) nextItem.prev->next = &nextItem;
+
     return 1;
 }
 
@@ -451,17 +480,31 @@ int sortByTitle(List *list) {
     return 0;
 }
 
-int changeNeighbor(CD &thisItem, CD &nextItem) {
-    CD *med = nextItem.next;
-    nextItem.next = &thisItem;
-    thisItem.next = med;
+int sortByDuration(List *list) {
+    if (list == NULL) return -1;
+    for (int j = 0; j < countList(list); j++) {
+        for (int i = 0; i < countList(list) - 1; i++) {
+            CD *thisItem = getPointerByIndex(list, i);
+            CD *nextItem = getPointerByIndex(list, i+1);
+            //If next item nearer than this than change their positions
+            if (thisItem->type != "Data" && nextItem->type == "Data") {
+                changeNeighbor(*thisItem, *nextItem);
 
-    med = thisItem.prev;
-    thisItem.prev = &nextItem;
-    nextItem.prev = med;
+                if (i == 0) list->head = nextItem;
+                if (i == countList(list) - 1) list->tail = thisItem;
+                continue;
+            }
 
-    if (thisItem.next != NULL) thisItem.next->prev = &thisItem;
-    if (nextItem.prev != NULL) nextItem.prev->next = &nextItem;
+            if (thisItem->type != "Data" && nextItem->type != "Data") {
+                if (((PlayCD *)thisItem)->duration > ((PlayCD *)nextItem)->duration) {
+                    changeNeighbor(*thisItem, *nextItem);
 
-    return 1;
+                    if (i == 0) list->head = nextItem;
+                    if (i == countList(list) - 1) list->tail = thisItem;
+                    continue;
+                }
+            }
+        }
+    }
+    return 0;
 }
