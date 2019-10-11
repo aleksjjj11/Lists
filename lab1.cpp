@@ -22,7 +22,7 @@ int menu(List *list) {
             << "9.  Print all list" << endl
             << "10. Searching by type" << endl
             << "11. Searching by author" << endl
-            << "12. Searching by " << endl
+            << "12. Searching by unused memory" << endl
             << "13. Sorting by title" << endl
             << "14. Sorting by duration" << endl
             << "15. Sorting by inuse memory" << endl
@@ -184,19 +184,26 @@ int menu(List *list) {
     }
     case 10: {
         string type;
-        cout << "Enter type: "; cin >> type;
+        cout << "Enter type: "; 
+        cin >> type;
         searchByType(list, type);
         getchar(); getchar();
         break;
     }
     case 11: {
         string author;
-        cout << "Enter author: "; cin >> author;
+        cout << "Enter author: "; 
+        cin >> author;
         searchByAuthor(list, author);
         getchar(); getchar();
         break;
     }
     case 12: {
+        long memorySearching;
+        cout << "Enter amount of unused memory: ";
+        cin >> memorySearching;
+        searchByUnusedMemory(list, memorySearching);
+        getchar(); getchar();
         break;
     }
     case 13: {
@@ -408,11 +415,16 @@ int insertItem(List *list, CD *item, int index) {
 int inputBaseCD(CD &item) {
     if (&item == NULL) return -1;
 
-    cout << "Title: "; cin >> item.title;
-    cout << "Total memory: "; cin >> item.totalMemory;
-    cout << "Inuse memory: "; cin >> item.inuseMemory;
-    cout << "Is appending (true[1]/false[0]): "; cin >> item.isAppending;
-    cout << "Is rewriting (true[1]/false[0]): "; cin >> item.isRewriting;
+    cout << "Title: "; 
+    cin >> item.title;
+    cout << "Total memory: "; 
+    cin >> item.totalMemory;
+    cout << "Inuse memory: "; 
+    cin >> item.inuseMemory;
+    cout << "Is appending (true[1]/false[0]): "; 
+    cin >> item.isAppending;
+    cout << "Is rewriting (true[1]/false[0]): "; 
+    cin >> item.isRewriting;
     return 1;
 }
 
@@ -461,6 +473,26 @@ int searchByAuthor(List *list, string search) {
         }
         
     }
+    if (count == 0) cout << "Nothing" << endl;
+    return 1;
+}
+
+int searchByUnusedMemory(List *list, int search) {
+    if (list == NULL) return -1;
+
+    cout << "Found items: " << endl;
+    int count = 0;
+
+    for (int i = 0; i < countList(list); i++) {
+        CD * item = getPointerByIndex(list, i);
+        if (item->totalMemory - item->inuseMemory >= search) {
+            printf("Index: %i - %p type: ", i, item);
+            cout << item->type << endl;
+            count++;
+            continue;
+        }
+    }
+
     if (count == 0) cout << "Nothing" << endl;
     return 1;
 }
