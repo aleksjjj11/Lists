@@ -25,9 +25,10 @@ int menu(List *list) {
             << "12. Searching by " << endl
             << "13. Sorting by title" << endl
             << "14. Sorting by duration" << endl
+            << "20. Print all information item" << endl
             << "0. Exit" << endl;
         cin >> chooseAction;
-    } while (chooseAction < 0 || chooseAction > 14);
+    } while (chooseAction < 0 || chooseAction > 20);
     switch (chooseAction)
     {
     case 0:
@@ -215,6 +216,15 @@ int menu(List *list) {
         getchar(); getchar();
         break;
     }
+    case 20: {
+        printList(list);
+        cout << "Enter index of item: ";
+        int index;
+        cin >> index;
+        printInformationItem(list, index);
+        getchar(); getchar();
+        break;
+    }
     default:
         break;
     }
@@ -252,8 +262,23 @@ void printList(List *list) {
     CD *med = list->head;
     int i = 0;
     do {
-        printf("%i.\t\t\t%4p\t\t\t%4p\t\t\t%4p\n", i, med->prev, med, med->next);
-        // cout << "\t\t\t" << med->prev->title << "\t\t\t" << med->title << "\t\t\t" << med->next->title << endl; 
+        //printf("%i.\t\t\t%4p\t\t\t%4p\t\t\t%4p\n", i, med->prev, med, med->next);
+        cout << i << ".";
+        if (med->prev != NULL) 
+            cout << "\t\t\t" << med->prev->title << "\t\t\t";
+        else 
+            cout << "\t\t\t" << "NULL" << "\t\t\t";   
+
+        if (med != NULL)
+            cout << med->title << "\t\t\t";
+        else 
+            cout << "NULL" << "\t\t\t";
+        
+        if (med->next != NULL)
+            cout << med->next->title << endl; 
+        else 
+            cout << "NULL" << endl; 
+
         med = med->next;
         i++;
     } while (med != NULL);
@@ -416,23 +441,6 @@ int searchByAuthor(List *list, string search) {
 
     for (int i = 0; i < countList(list); i++) {
         CD * item = getPointerByIndex(list, i);
-        // if (item->type == "Audio" || item->type == "MP3") {
-        //     if (((AudioCD *)item)->author == search) {
-        //         printf("Index: %i - %p type: ", i, item);
-        //         cout << item->type << endl;
-        //         count++;
-        //         continue;
-        //     }
-        // }
-
-        // if (item->type == "Video" || item->type == "DVD") {
-        //     if (((VideoCD *)item)->author == search) {
-        //         printf("Index: %i - %p type: ", i, item);
-        //         cout << item->type << endl;
-        //         count++;
-        //         continue;
-        //     }
-        // }
         if (item->type == "Video" || item->type == "DVD" || item->type == "Audio" || item->type == "MP3") {
             if (((PlayCD *)item)->author == search) {
                 printf("Index: %i - %p type: ", i, item);
@@ -506,5 +514,50 @@ int sortByDuration(List *list) {
             }
         }
     }
-    return 0;
+    return 1;
+}
+
+int sortByInuseMemory(List *list) {
+    if (list == NULL) return -1;
+    
+    for (int j = 0; j < countList(list); j++) {
+        for (int i = 0; i < countList(list) - 1; i++) {
+            CD *thisItem = getPointerByIndex(list, i);
+            CD *nextItem = getPointerByIndex(list, i+1);
+
+            if (thisItem->inuseMemory > nextItem->inuseMemory) {
+                changeNeighbor(*thisItem, *nextItem);
+
+                if (i == 0) list->head = nextItem;
+                if (i == countList(list) - 1) list->tail = thisItem;
+                continue;
+            }
+        }
+    }
+    return 1;
+}
+
+int printInformationItem(CD *item) {
+    if (item == NULL) {
+        cout << "Null pointer" << endl;
+        return 0;
+    }
+    cout << "Title: " << item->title << endl << "Type: " << item->type << endl
+         << "Total memory(mb): " << item->totalMemory << endl
+         << "Inuse memory(mb): " << item->inuseMemory << endl
+         << "Is appending: " << item->isAppending << endl
+         << "Is rewriting: " << item->isRewriting << endl;
+
+    if (item->type == "Video" || item->type == "DVD" || item->type == "Audio" || item->type == "MP3") {
+        cout << "Author: " << ((PlayCD *)item)->author << endl
+             << "Duration(seconds): " << ((PlayCD *)item)->duration << endl;
+    }
+    return 1;
+}
+
+int printInformationItem(List *list, int index) {
+    CD *item = getPointerByIndex(list, index);
+    
+    printInformationItem(item);
+    return 1;
 }

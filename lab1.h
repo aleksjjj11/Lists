@@ -51,10 +51,12 @@ int menu(List *list);
 int inputBaseCD(CD &item); //done
 int inputPlayCD(PlayCD &item); //done
 int sortByTitle(List *list); //done
-int sortByDuration(List *list);
-int sortByInuseMemory(List *list);
+int sortByDuration(List *list); //done
+int sortByInuseMemory(List *list); //done
 int searchByType(List *list, std::string search); //done
 int searchByAuthor(List *list, std::string search); //done
 CD *searchBy();//По достаточному количеству свободной памяти
 //For help
 int changeNeighbor(CD &thisItem, CD &nextItem);
+int printInformationItem(CD *item);
+int printInformationItem(List *list, int index);
