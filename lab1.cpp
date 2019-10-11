@@ -25,6 +25,7 @@ int menu(List *list) {
             << "12. Searching by " << endl
             << "13. Sorting by title" << endl
             << "14. Sorting by duration" << endl
+            << "15. Sorting by inuse memory" << endl
             << "20. Print all information item" << endl
             << "0. Exit" << endl;
         cin >> chooseAction;
@@ -211,6 +212,15 @@ int menu(List *list) {
         cout << "Before sorting" << endl; 
         printList(list);
         sortByDuration(list);
+        cout << endl << "After sorting" << endl;
+        printList(list);
+        getchar(); getchar();
+        break;
+    }
+    case 15: {
+        cout << "Before sorting" << endl; 
+        printList(list);
+        sortByInuseMemory(list);
         cout << endl << "After sorting" << endl;
         printList(list);
         getchar(); getchar();
