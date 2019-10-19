@@ -1,4 +1,4 @@
-#include "lab1.h"
+#include "subj.h"
 
 using namespace std;
 
@@ -21,11 +21,12 @@ int menu(List *list) {
             << "8.  Insert item" << endl
             << "9.  Print all list" << endl
             << "10. Searching by type" << endl
-            << "11. Searching by author" << endl
+            << "11. Searching by artist" << endl
             << "12. Searching by unused memory" << endl
             << "13. Sorting by title" << endl
             << "14. Sorting by duration" << endl
             << "15. Sorting by inuse memory" << endl
+            << "16. Searching by director" << endl
             << "20. Print all information item" << endl
             << "0. Exit" << endl;
         cin >> chooseAction;
@@ -39,52 +40,13 @@ int menu(List *list) {
         int chooseType = 0;
         do {
             rewind(stdin);
-            cout << "Choose type of CD, pls: \n1 - Data\n2 - Audio\n3 - MP3\n4 - Video\n5 - DVD" << endl;
+            cout << "Choose type of BaseCD, pls: \n1 - Data\n2 - Audio\n3 - MP3\n4 - Video\n5 - DVD" << endl;
 
         } while (scanf("%i", &chooseType) != 1 || chooseType > 5 || chooseType < 1);
 
-        CD *itemLoc;
-        switch (chooseType)
-        {
-        case 1: {
-            itemLoc = new DataCD();
-            itemLoc->type = "Data";
-            inputBaseCD(*itemLoc);
-            break;
-        }
-        case 2: {
-            itemLoc = new AudioCD;
-            itemLoc->type = "Audio";
-            inputBaseCD(*itemLoc);
-            inputPlayCD(*((PlayCD *)itemLoc));
-            break;
-        }
-        case 3: {
-            itemLoc = new MP3CD;
-            itemLoc->type = "MP3";
-            inputBaseCD(*itemLoc);
-            inputPlayCD(*((PlayCD *)itemLoc));
-            break;
-        }
-        case 4: {
-            itemLoc = new VideoCD;
-            itemLoc->type = "Video";
-            inputBaseCD(*itemLoc);
-            inputPlayCD(*((PlayCD *)itemLoc));
-            break;
-        }
-        case 5: {
-            itemLoc = new DVD;
-            itemLoc->type = "DVD";
-            inputBaseCD(*itemLoc);
-            inputPlayCD(*((PlayCD *)itemLoc));
-            cout << "Enter amount sections: "; 
-            cin >> itemLoc->numSections;
-            break;
-        }
-        default:
-            break;
-        }
+        BaseCD *itemLoc = createCD(chooseType);
+        //заменить на фабричную функцию Create
+        
         return addItem(list, itemLoc);
     }
     case 2: {
@@ -95,12 +57,10 @@ int menu(List *list) {
         return 1;
     }
     case 3: {
-        CD *itemLoc;
+        BaseCD *itemLoc;
         printList(list);
         scanf("%p", &itemLoc);
         int result = getIndexByPointer(list, itemLoc);
-        // cout << "Result: " << result << endl;
-        // getchar();
         if (result > -1)
             cout << "Index = " << result;
         else 
@@ -111,11 +71,11 @@ int menu(List *list) {
     }
     case 4: {
         int indexSearch = 0;
-        CD *itemSearch = NULL;
+        BaseCD *itemSearch = NULL;
         printList(list);
         cout << "Enter index: ";
         cin >> indexSearch;
-        itemSearch = getPointerByIndex(list, indexSearch);
+        itemSearch = (BaseCD *)getPointerByIndex(list, indexSearch);
         if (itemSearch) {
             cout << "Found pointer: " << itemSearch << endl;
             getchar(); getchar();
@@ -125,11 +85,11 @@ int menu(List *list) {
     }
     case 5: {
         int index;
-        CD *result = NULL;
+        BaseCD *result = NULL;
         printList(list);
         cout << "Enter index for removing: ";
         cin >> index;
-        result = getPointerByIndex(list, index);
+        result = (BaseCD *)getPointerByIndex(list, index);
         if (result == NULL) return 0;
         
         cout << "Deleted pointer - " << result << endl;
@@ -139,11 +99,11 @@ int menu(List *list) {
     }
     case 6: {
         int index;
-        CD *result = NULL;
+        BaseCD *result = NULL;
         printList(list);
         cout << "Enter index for removing: ";
         cin >> index;
-        result = removeItem(list, index);
+        result = (BaseCD *)removeItem(list, index);
         if (result == NULL) return 0;
         
         cout << "Removed pointer - " << result << endl;
@@ -163,7 +123,7 @@ int menu(List *list) {
         }
     }
     case 8: {
-        CD *itemLoc = new CD;
+        BaseCD *itemLoc = new BaseCD;
         int position = 0;
         printList(list);
         cout << "Enter position for inserting: ";
@@ -178,23 +138,24 @@ int menu(List *list) {
         return 1;
     }
     case 9: {
-        printList(list);
+        printExtendedList(list);
         getchar(); getchar();
         break;
     }
     case 10: {
-        string type;
-        cout << "Enter type: "; 
+        int type;
+        cout << "Choose type:\n0-Data\n1-Audio\n2-MP3\n3-Video\n4-DVD\nYour pick: "; 
         cin >> type;
-        searchByType(list, type);
+        searchByType(list, (TypesCD)type);
         getchar(); getchar();
         break;
     }
     case 11: {
-        string author;
-        cout << "Enter author: "; 
-        cin >> author;
-        searchByAuthor(list, author);
+        string artist;
+        cout << "Enter artist: "; 
+        cin >> artist;
+        //Есть возможность использовать все найденные элементы, так как функция возвращает массив указателей
+        searchByArtist(list, artist);
         getchar(); getchar();
         break;
     }
@@ -202,34 +163,43 @@ int menu(List *list) {
         long memorySearching;
         cout << "Enter amount of unused memory: ";
         cin >> memorySearching;
+        //функции поиска должны возвращать массив указателей
         searchByUnusedMemory(list, memorySearching);
         getchar(); getchar();
         break;
     }
     case 13: {
         cout << "Before sorting" << endl; 
-        printList(list);
-        sortByTitle(list);
+        printExtendedList(list);
+        sort(list, TypeSort::Title);        
         cout << endl << "After sorting" << endl;
-        printList(list);
+        printExtendedList(list);
         getchar(); getchar();
         break;
     }
     case 14: {
         cout << "Before sorting" << endl; 
-        printList(list);
-        sortByDuration(list);
+        printExtendedList(list);
+        sort(list, TypeSort::Duration);
         cout << endl << "After sorting" << endl;
-        printList(list);
+        printExtendedList(list);
         getchar(); getchar();
         break;
     }
     case 15: {
         cout << "Before sorting" << endl; 
-        printList(list);
-        sortByInuseMemory(list);
+        printExtendedList(list);
+        sort(list, TypeSort::InuseMemory);
         cout << endl << "After sorting" << endl;
-        printList(list);
+        printExtendedList(list);
+        getchar(); getchar();
+        break;
+    }
+    case 16: {
+        string director;
+        cout << "Enter director: "; 
+        cin >> director;
+        searchByDirector(list, director);
         getchar(); getchar();
         break;
     }
@@ -248,7 +218,7 @@ int menu(List *list) {
     return 1;
 }
 
-int addItem(List *list, CD *item) {
+int addItem(List *list, ListItem *item) {
     if (list == NULL) return -1;
     if (item == NULL) return -2;
     
@@ -272,17 +242,14 @@ void printList(List *list) {
     if (list == NULL || list->head == NULL) {
         cout << "List empty." << endl; 
         cout << "Press any key for contien" << endl;
-        getchar(); getchar();
         return;
     }
-    //printItem(list->head);
-    CD *med = list->head;
+    BaseCD *med = (BaseCD *)list->head;
     int i = 0;
     do {
-        //printf("%i.\t\t\t%4p\t\t\t%4p\t\t\t%4p\n", i, med->prev, med, med->next);
         cout << i << ".";
         if (med->prev != NULL) 
-            cout << "\t\t\t" << med->prev->title << "\t\t\t";
+            cout << "\t\t\t" << ((BaseCD *)med->prev)->title << "\t\t\t";
         else 
             cout << "\t\t\t" << "NULL" << "\t\t\t";   
 
@@ -292,15 +259,13 @@ void printList(List *list) {
             cout << "NULL" << "\t\t\t";
         
         if (med->next != NULL)
-            cout << med->next->title << endl; 
+            cout << ((BaseCD *)med->next)->title << endl; 
         else 
             cout << "NULL" << endl; 
 
-        med = med->next;
+        med = (BaseCD *)med->next;
         i++;
     } while (med != NULL);
-    //cout << "Press any key for contien" << endl;
-    //sgetchar(); getchar();
 }
 
 int countList(List *list) {
@@ -308,7 +273,7 @@ int countList(List *list) {
         return 0;
     }
     int count = 0;
-    CD *med = list->head;
+    ListItem *med = list->head;
     do {
         count++;
         med = med->next;
@@ -316,10 +281,10 @@ int countList(List *list) {
     return count;
 }
 
-int getIndexByPointer(List *list, CD *search) {
+int getIndexByPointer(List *list, ListItem *search) {
     if (list == NULL) return -1;
     if (search == NULL) return -2;
-    CD *med = list->head;
+    ListItem *med = list->head;
     int count = countList(list);
     for(int index = 0; med; index++) {
         if (med == search) return index;
@@ -328,11 +293,11 @@ int getIndexByPointer(List *list, CD *search) {
     return -3;
 }
 
-CD* getPointerByIndex(List *list, int index) {
+ListItem* getPointerByIndex(List *list, int index) {
     if (list == NULL) return NULL;
     if (index < 0 || index > countList(list)) return NULL;
     int i = 0;
-    CD *med = list->head;
+    ListItem *med = list->head;
     while (i < index && med != NULL) {
         i++;
         med = med->next;
@@ -340,11 +305,11 @@ CD* getPointerByIndex(List *list, int index) {
     return med;
 }
 
-CD* removeItem(List *list, int index) {
+ListItem* removeItem(List *list, int index) {
     if (list == NULL) return NULL;
     if (index < 0 || index > countList(list)) return NULL;
 
-    CD *item = getPointerByIndex(list, index);
+    BaseCD *item = (BaseCD *)getPointerByIndex(list, index);
     if (item == NULL) return NULL;
 
     if (countList(list) == 1) {
@@ -376,18 +341,26 @@ int deleteItem(List *list, int index) {
 
 int clearList(List *list) {
     if (list == NULL || list->head == NULL) return 0;
-    delete(list);
+
+    BaseCD *med = (BaseCD *)list->tail;
+    while (med) {
+        //todo использовать функцию deleteitem
+        BaseCD *item = (BaseCD *)med->prev;
+        deleteItem(list, countList(list) - 1);
+        med = item;
+    }
+    delete list;
     return 1;
 }
 
-int insertItem(List *list, CD *item, int index) {
+int insertItem(List *list, ListItem *item, int index) {
 
     if (index >= countList(list)){
         addItem(list,item);
         return 1;
     }
 
-    CD *pointer = getPointerByIndex(list, index);
+    ListItem *pointer = getPointerByIndex(list, index);
 
     if (pointer == NULL) return 0;
 
@@ -411,8 +384,43 @@ int insertItem(List *list, CD *item, int index) {
     printList(list);
     return 1;
 }
-//Input base information about CD
-int inputBaseCD(CD &item) {
+
+BaseCD *createCD(int pickType) {
+    BaseCD *itemLoc;
+    switch (pickType)
+        {
+        case 1: {
+            itemLoc = new DataCD();
+            inputBaseCD(*itemLoc);
+            break;
+        }
+        case 2: {
+            itemLoc = new AudioCD;
+            inputAudioCD(*((AudioCD *)itemLoc));
+            break;
+        }
+        case 3: {
+            itemLoc = new MP3CD;
+            inputAudioCD(*((AudioCD *)itemLoc));
+            break;
+        }
+        case 4: {
+            itemLoc = new VideoCD;
+            inputVideoCD(*((VideoCD *)itemLoc));
+            break;
+        }
+        case 5: {
+            itemLoc = new DVD;
+            inputDVD(*((DVD *)itemLoc));
+            break;
+        }
+        default:
+            NULL;
+        }
+    return itemLoc;
+}
+//Input base information about BaseCD
+int inputBaseCD(BaseCD &item) {
     if (&item == NULL) return -1;
 
     cout << "Title: "; 
@@ -421,50 +429,101 @@ int inputBaseCD(CD &item) {
     cin >> item.totalMemory;
     cout << "Inuse memory: "; 
     cin >> item.inuseMemory;
+    if (item.inuseMemory > item.totalMemory) item.inuseMemory = item.totalMemory;
     cout << "Is appending (true[1]/false[0]): "; 
     cin >> item.isAppending;
     cout << "Is rewriting (true[1]/false[0]): "; 
     cin >> item.isRewriting;
+    item.type = TData;
     return 1;
 }
 
-int inputPlayCD(PlayCD &item) {
+int inputAudioCD(AudioCD &item) {
     if (&item == NULL) return -2;
-
-    cout << "Author: "; 
-    cin >> item.author;
+    
+    inputBaseCD((BaseCD &)item);
+    cout << "Artist: "; 
+    cin >> item.artist;
     cout << "Duration(seconds): "; 
     cin >> item.duration;
+    item.type = TAudio;
     return 1;
 }
 
-int searchByType(List *list, string search) {
-    if (list == NULL) return -1;
+int inputMP3CD(MP3CD &item) {
+    if (&item == NULL) return -2;
+
+    inputAudioCD((AudioCD &)item);
+    item.type = TMP3;
+    return 1;
+}
+
+int inputVideoCD(VideoCD &item) {
+    if (&item == NULL) return -2;
+
+    inputBaseCD((BaseCD &)item);
+    cout << "Director: "; 
+    cin >> item.director;
+    cout << "Duration(seconds): "; 
+    cin >> item.duration;
+    item.type = TVideo;
+    return 1;
+}
+
+int inputDVD(DVD &item) {
+    if (&item == NULL) return -2;
+
+    inputVideoCD((VideoCD &)item);
+    cout << "Enter amount sections: "; 
+    cin >> item.numSections;
+    item.type = TDVD;
+    return 1;
+}
+
+BaseCD **searchByType(List *list, TypesCD search) {
+    if (list == NULL) return NULL;
 
     cout << "Found items: " << endl;
     int count = 0;
+    BaseCD **arrayCD = (BaseCD **)malloc(sizeof(BaseCD *));
 
     for (int i = 0; i < countList(list); i++) {
-        CD * item = getPointerByIndex(list, i);
+        BaseCD * item = (BaseCD *)getPointerByIndex(list, i);
         if (item->type == search) {
+            if (count == 0) {
+                arrayCD[count] = item;
+            }
+            arrayCD = (BaseCD **)realloc(arrayCD, sizeof(BaseCD *)*(count+1));
+            arrayCD[count] = item;
+            
             printf("Index: %i - %p\n", i, item);
             count++;
         }
     }
-    if (count == 0) cout << "Nothing" << endl;
-    return 1;
+    if (count == 0) {
+        cout << "Nothing" << endl;
+        return NULL;
+    }
+    return arrayCD;
 }
 
-int searchByAuthor(List *list, string search) {
-    if (list == NULL) return -1;
+BaseCD **searchByArtist(List *list, string search) {
+    if (list == NULL) return NULL;
 
     cout << "Found items: " << endl;
     int count = 0;
+    BaseCD **arrayCD = (BaseCD **)malloc(sizeof(BaseCD *));
 
     for (int i = 0; i < countList(list); i++) {
-        CD * item = getPointerByIndex(list, i);
-        if (item->type == "Video" || item->type == "DVD" || item->type == "Audio" || item->type == "MP3") {
-            if (((PlayCD *)item)->author == search) {
+        BaseCD * item = (BaseCD *)getPointerByIndex(list, i);
+        if (item->type == TAudio || item->type == TMP3) {
+            if (((AudioCD *)item)->artist == search) {
+                if (count == 0) {
+                    arrayCD[count] = item;
+                }
+                arrayCD = (BaseCD **)realloc(arrayCD, sizeof(BaseCD *)*(count+1));
+                arrayCD[count] = item;
+
                 printf("Index: %i - %p type: ", i, item);
                 cout << item->type << endl;
                 count++;
@@ -473,19 +532,61 @@ int searchByAuthor(List *list, string search) {
         }
         
     }
-    if (count == 0) cout << "Nothing" << endl;
-    return 1;
+    if (count == 0) {
+        cout << "Nothing" << endl;
+        return NULL;
+    }
+    return arrayCD;
 }
 
-int searchByUnusedMemory(List *list, int search) {
-    if (list == NULL) return -1;
+BaseCD **searchByDirector(List *list, std::string search) {
+    if (list == NULL) return NULL;
 
     cout << "Found items: " << endl;
     int count = 0;
+    BaseCD **arrayCD = (BaseCD **)malloc(sizeof(BaseCD *));
 
     for (int i = 0; i < countList(list); i++) {
-        CD * item = getPointerByIndex(list, i);
+        BaseCD * item = (BaseCD *)getPointerByIndex(list, i);
+        if (item->type == TVideo || item->type == TDVD) {
+            if (((VideoCD *)item)->director == search) {
+                if (count == 0) {
+                    arrayCD[count] = item;
+                }
+                arrayCD = (BaseCD **)realloc(arrayCD, sizeof(BaseCD *)*(count+1));
+                arrayCD[count] = item;
+
+                printf("Index: %i - %p type: ", i, item);
+                cout << item->type << endl;
+                count++;
+                continue;
+            }
+        }
+        
+    }
+    if (count == 0) {
+        cout << "Nothing" << endl;
+        return NULL;
+    }
+    return arrayCD;
+}
+
+BaseCD ** searchByUnusedMemory(List *list, int search) {
+    if (list == NULL) return NULL;
+
+    cout << "Found items: " << endl;
+    int count = 0;
+    BaseCD **arrayCD = (BaseCD **)malloc(sizeof(BaseCD *));
+
+    for (int i = 0; i < countList(list); i++) {
+        BaseCD * item = (BaseCD *)getPointerByIndex(list, i);
         if (item->totalMemory - item->inuseMemory >= search) {
+            if (count == 0) {
+                arrayCD[count] = item;
+            }
+            arrayCD = (BaseCD **)realloc(arrayCD, sizeof(BaseCD *)*(count+1));
+            arrayCD[count] = item;
+
             printf("Index: %i - %p type: ", i, item);
             cout << item->type << endl;
             count++;
@@ -493,16 +594,19 @@ int searchByUnusedMemory(List *list, int search) {
         }
     }
 
-    if (count == 0) cout << "Nothing" << endl;
-    return 1;
+    if (count == 0) {
+        cout << "Nothing" << endl;
+        return NULL;
+    }
+    return arrayCD;
 }
 
-int changeNeighbor(CD &thisItem, CD &nextItem) {
-    CD *med = nextItem.next;
+int changeNeighbor(BaseCD &thisItem, BaseCD &nextItem) {
+    BaseCD *med = (BaseCD *)nextItem.next;
     nextItem.next = &thisItem;
     thisItem.next = med;
 
-    med = thisItem.prev;
+    med = (BaseCD *)thisItem.prev;
     thisItem.prev = &nextItem;
     nextItem.prev = med;
 
@@ -512,14 +616,42 @@ int changeNeighbor(CD &thisItem, CD &nextItem) {
     return 1;
 }
 
-int sortByTitle(List *list) {
+bool shouldSwap(BaseCD *obj1, BaseCD *obj2, TypeSort type) {
+    switch (type)
+    {
+    case TypeSort::Title: {
+        return obj1->title.compare(obj2->title) > 0;
+    }
+    case TypeSort::InuseMemory: {
+        return obj1->inuseMemory > obj2->inuseMemory 
+    }
+    case TypeSort::Duration: {
+        if (obj1->type == TypesCD::TData && obj2->type != TypesCD::TData) 
+            return true;
+
+        if (obj1->type == TypesCD::TData && obj2->type == TypesCD::TData)
+            return false;
+
+        if (((PlayCD *)obj1)->duration > ((PlayCD *)obj2)->duration)
+            return true;
+        else 
+            return false;
+    }
+    
+    default:
+        break;
+    }
+}
+
+int sort(List *list, TypeSort type) {
     if (list == NULL) return -1;
+
     for (int j = 0; j < countList(list); j++) {
         for (int i = 0; i < countList(list) - 1; i++) {
-            CD *thisItem = getPointerByIndex(list, i);
-            CD *nextItem = getPointerByIndex(list, i+1);
+            BaseCD *thisItem = (BaseCD *)getPointerByIndex(list, i);
+            BaseCD *nextItem = (BaseCD *)getPointerByIndex(list, i+1);
             //If next item nearer than this than change their positions
-            if (thisItem->title.compare(nextItem->title) > 0) {
+            if (shouldSwap(thisItem, nextItem, type)) {
                 changeNeighbor(*thisItem, *nextItem);
 
                 if (i == 0) list->head = nextItem;
@@ -530,56 +662,7 @@ int sortByTitle(List *list) {
     return 0;
 }
 
-int sortByDuration(List *list) {
-    if (list == NULL) return -1;
-    for (int j = 0; j < countList(list); j++) {
-        for (int i = 0; i < countList(list) - 1; i++) {
-            CD *thisItem = getPointerByIndex(list, i);
-            CD *nextItem = getPointerByIndex(list, i+1);
-            //If next item nearer than this than change their positions
-            if (thisItem->type != "Data" && nextItem->type == "Data") {
-                changeNeighbor(*thisItem, *nextItem);
-
-                if (i == 0) list->head = nextItem;
-                if (i == countList(list) - 1) list->tail = thisItem;
-                continue;
-            }
-
-            if (thisItem->type != "Data" && nextItem->type != "Data") {
-                if (((PlayCD *)thisItem)->duration > ((PlayCD *)nextItem)->duration) {
-                    changeNeighbor(*thisItem, *nextItem);
-
-                    if (i == 0) list->head = nextItem;
-                    if (i == countList(list) - 1) list->tail = thisItem;
-                    continue;
-                }
-            }
-        }
-    }
-    return 1;
-}
-
-int sortByInuseMemory(List *list) {
-    if (list == NULL) return -1;
-    
-    for (int j = 0; j < countList(list); j++) {
-        for (int i = 0; i < countList(list) - 1; i++) {
-            CD *thisItem = getPointerByIndex(list, i);
-            CD *nextItem = getPointerByIndex(list, i+1);
-
-            if (thisItem->inuseMemory > nextItem->inuseMemory) {
-                changeNeighbor(*thisItem, *nextItem);
-
-                if (i == 0) list->head = nextItem;
-                if (i == countList(list) - 1) list->tail = thisItem;
-                continue;
-            }
-        }
-    }
-    return 1;
-}
-
-int printInformationItem(CD *item) {
+int printInformationItem(BaseCD *item) {
     if (item == NULL) {
         cout << "Null pointer" << endl;
         return 0;
@@ -590,16 +673,41 @@ int printInformationItem(CD *item) {
          << "Is appending: " << item->isAppending << endl
          << "Is rewriting: " << item->isRewriting << endl;
 
-    if (item->type == "Video" || item->type == "DVD" || item->type == "Audio" || item->type == "MP3") {
-        cout << "Author: " << ((PlayCD *)item)->author << endl
+    if (item->type == TypesCD::TAudio || item->type == TypesCD::TMP3) {
+        cout << "Artist: " << ((AudioCD *)item)->artist << endl
              << "Duration(seconds): " << ((PlayCD *)item)->duration << endl;
+        return 1;
+    }
+    if (item->type == TypesCD::TVideo || item->type == TypesCD::TDVD) {
+        cout << "Artist: " << ((AudioCD *)item)->artist << endl
+             << "Duration(seconds): " << ((PlayCD *)item)->duration << endl;
+    }
+    if (item->type == TypesCD::TDVD) {
+        cout << "Available sections: " << ((DVD *)item)->numSections << endl;
     }
     return 1;
 }
 
 int printInformationItem(List *list, int index) {
-    CD *item = getPointerByIndex(list, index);
+    ListItem *item = getPointerByIndex(list, index);
     
-    printInformationItem(item);
+    printInformationItem((BaseCD *)item);
     return 1;
 }
+
+void printExtendedList(List *list) {
+    if (list == NULL || list->head == NULL) {
+        cout << "Empty" << endl;
+        return;
+    }
+    for (int i = 0; i < countList(list); i++) {
+        cout << "\t\t\t\tElement " << i << endl;
+        printInformationItem(list, i);
+    }
+}
+
+//todo сделать функцию подробного вывода всех элементов //done
+//todo функции сортировки выводят подробный вывод списка //done
+//todo элементы, не поддающиеся сортировке идут в конец //done
+//todo inuse не может быть больше memory capacity //done
+//todo вынести объектно ориентированную часть работы в отдельный модуль //done

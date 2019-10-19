@@ -1,4 +1,4 @@
-#include "lab1.h"
+#include "subj.h"
 
 int main() 
 {
