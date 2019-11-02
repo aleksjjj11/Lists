@@ -17,7 +17,8 @@ enum TypeSort {
     Duration = 2
 };
 
-struct BaseCD : ListItem {
+class BaseCD : public ListItem {
+public:
     //todo type должен быть enum //done
     TypesCD type;
     std::string title = "";
@@ -26,24 +27,28 @@ struct BaseCD : ListItem {
     bool isAppending = false;
     bool isRewriting = false;
 };
-struct DataCD : BaseCD {};
+class DataCD : public BaseCD {};
 
 // todo разделить автора и режиссера //done
-struct PlayCD : BaseCD {
+class PlayCD : public BaseCD {
+public:
     long duration = 0;
 };
 
-struct AudioCD : PlayCD {
+class AudioCD : public PlayCD {
+public:
     std::string artist = "";
 };
 
-struct MP3CD : AudioCD {};
+class MP3CD : public AudioCD {};
 
-struct VideoCD : PlayCD {
+class VideoCD : public PlayCD {
+public:
     std::string director = "";
 };
 
-struct DVD : VideoCD {
+class DVD : public VideoCD {
+public:
     int numSections = 1;
 };
 

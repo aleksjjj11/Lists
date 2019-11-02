@@ -47,7 +47,7 @@ int menu(List *list) {
         BaseCD *itemLoc = createCD(chooseType);
         //заменить на фабричную функцию Create
         
-        return addItem(list, itemLoc);
+        return addItem(list, (ListItem *)itemLoc);
     }
     case 2: {
         int count = countList(list);
@@ -60,7 +60,7 @@ int menu(List *list) {
         BaseCD *itemLoc;
         printList(list);
         scanf("%p", &itemLoc);
-        int result = getIndexByPointer(list, itemLoc);
+        int result = getIndexByPointer(list, (ListItem *)itemLoc);
         if (result > -1)
             cout << "Index = " << result;
         else 
@@ -129,7 +129,7 @@ int menu(List *list) {
         cout << "Enter position for inserting: ";
         cin >> position;
         cout << "Inserting list item: " << itemLoc << endl;
-        if (insertItem(list, itemLoc, position) == 0) {
+        if (insertItem(list, (ListItem *)itemLoc, position) == 0) {
             cout << "Attempt to insert null pointer." << endl;
             cout << "Press any key for contien" << endl;
             getchar(); getchar();
@@ -222,34 +222,34 @@ int addItem(List *list, ListItem *item) {
     if (list == NULL) return -1;
     if (item == NULL) return -2;
     
-    if (list->head == NULL) {
-        list->head = item;
-        list->tail = item;
-        item->prev = NULL;
+    if (list->GetHead() == NULL) {
+        list->SetHead(item);
+        list->SetTail(item);
+        item->SetPrev();
     } else {
-        item->prev = list->tail;
-        list->tail->next = item;
+        item->SetPrev(list->GetTail());
+        list->GetTail()->SetNext(item);
 
-        list->tail = item;
+        list->SetTail(item);
     }
-        item->next = NULL;
+    item->SetNext();
     printf("Added list item %p\n", item);
     printList(list);
     return 1;
 }
 
 void printList(List *list) {
-    if (list == NULL || list->head == NULL) {
+    if (list == NULL || list->GetHead() == NULL) {
         cout << "List empty." << endl; 
         cout << "Press any key for contien" << endl;
         return;
     }
-    BaseCD *med = (BaseCD *)list->head;
+    BaseCD *med = (BaseCD *)list->GetHead();
     int i = 0;
     do {
         cout << i << ".";
-        if (med->prev != NULL) 
-            cout << "\t\t\t" << ((BaseCD *)med->prev)->title << "\t\t\t";
+        if (med->GetPrev() != NULL) 
+            cout << "\t\t\t" << ((BaseCD *)med->GetPrev())->title << "\t\t\t";
         else 
             cout << "\t\t\t" << "NULL" << "\t\t\t";   
 
@@ -258,25 +258,25 @@ void printList(List *list) {
         else 
             cout << "NULL" << "\t\t\t";
         
-        if (med->next != NULL)
-            cout << ((BaseCD *)med->next)->title << endl; 
+        if (med->GetNext() != NULL)
+            cout << ((BaseCD *)med->GetNext())->title << endl; 
         else 
             cout << "NULL" << endl; 
 
-        med = (BaseCD *)med->next;
+        med = (BaseCD *)med->GetNext();
         i++;
     } while (med != NULL);
 }
 
 int countList(List *list) {
-    if (list == NULL || list->head == NULL) {
+    if (list == NULL || list->GetHead() == NULL) {
         return 0;
     }
     int count = 0;
-    ListItem *med = list->head;
+    ListItem *med = list->GetHead();
     do {
         count++;
-        med = med->next;
+        med = med->GetNext();
     } while (med != NULL);
     return count;
 }
@@ -284,11 +284,11 @@ int countList(List *list) {
 int getIndexByPointer(List *list, ListItem *search) {
     if (list == NULL) return -1;
     if (search == NULL) return -2;
-    ListItem *med = list->head;
+    ListItem *med = list->GetHead();
     int count = countList(list);
     for(int index = 0; med; index++) {
         if (med == search) return index;
-        med = med->next;
+        med = med->GetNext();
     }
     return -3;
 }
@@ -297,10 +297,10 @@ ListItem* getPointerByIndex(List *list, int index) {
     if (list == NULL) return NULL;
     if (index < 0 || index > countList(list)) return NULL;
     int i = 0;
-    ListItem *med = list->head;
+    ListItem *med = list->GetHead();
     while (i < index && med != NULL) {
         i++;
-        med = med->next;
+        med = med->GetNext();
     }   
     return med;
 }
@@ -313,25 +313,25 @@ ListItem* removeItem(List *list, int index) {
     if (item == NULL) return NULL;
 
     if (countList(list) == 1) {
-        list->head = NULL;
-        list->tail = NULL;
-        return item;
+        list->SetHead();
+        list->SetTail();
+        return (ListItem *)item;
     }
 
-    if (item == list->head) {
-        list->head = item->next;
-        item->next->prev = NULL;
-        return item;        
+    if (item == list->GetHead()) {
+        list->SetHead(item->GetNext());
+        item->GetNext()->SetPrev();
+        return (ListItem *)item;        
     }
-    if (item == list->tail) {
-        list->tail = item->prev;
-        item->prev->next = NULL;
-        return item;
+    if (item == list->GetTail()) {
+        list->SetTail(item->GetPrev());
+        item->GetPrev()->SetNext();
+        return (ListItem *)item;
     }
 
-    item->prev->next = item->next;
-    item->next->prev = item->prev;
-    return item;
+    item->GetPrev()->SetNext(item->GetNext());
+    item->GetNext()->SetPrev(item->GetPrev());
+    return (ListItem *)item;
 }
 
 int deleteItem(List *list, int index) {
@@ -340,12 +340,12 @@ int deleteItem(List *list, int index) {
 }
 
 int clearList(List *list) {
-    if (list == NULL || list->head == NULL) return 0;
+    if (list == NULL || list->GetHead() == NULL) return 0;
 
-    BaseCD *med = (BaseCD *)list->tail;
+    BaseCD *med = (BaseCD *)list->GetTail();
     while (med) {
         //todo использовать функцию deleteitem
-        BaseCD *item = (BaseCD *)med->prev;
+        BaseCD *item = (BaseCD *)med->GetPrev();
         deleteItem(list, countList(list) - 1);
         med = item;
     }
@@ -364,22 +364,22 @@ int insertItem(List *list, ListItem *item, int index) {
 
     if (pointer == NULL) return 0;
 
-    if (pointer == list->head) {
-        list->head = item;
+    if (pointer == list->GetHead()) {
+        list->SetHead(item);
 
-        pointer->prev = item;
-        item->next = pointer;
-        item->prev = NULL;
+        pointer->SetPrev(item);
+        item->SetNext(pointer);
+        item->SetPrev();
         cout << "Pointer " << item << " was successfully inserted." << endl;
         printList(list);
         return 1;
     }
 
-    item->prev = pointer->prev;
-    item->next = pointer;
+    item->SetPrev(pointer->GetPrev());
+    item->SetNext(pointer);
 
-    pointer->prev->next = item;
-    pointer->prev = item;
+    pointer->GetPrev()->SetNext(item);
+    pointer->SetPrev(item);
     cout << "Pointer " << item << " was successfully inserted." << endl;
     printList(list);
     return 1;
@@ -390,27 +390,27 @@ BaseCD *createCD(int pickType) {
     switch (pickType)
         {
         case 1: {
-            itemLoc = new DataCD();
+            itemLoc = (BaseCD *)(new DataCD());
             inputBaseCD(*itemLoc);
             break;
         }
         case 2: {
-            itemLoc = new AudioCD;
+            itemLoc = (BaseCD *)(new AudioCD());
             inputAudioCD(*((AudioCD *)itemLoc));
             break;
         }
         case 3: {
-            itemLoc = new MP3CD;
+            itemLoc = (BaseCD *)(new MP3CD());
             inputAudioCD(*((AudioCD *)itemLoc));
             break;
         }
         case 4: {
-            itemLoc = new VideoCD;
+            itemLoc = (BaseCD *)(new VideoCD());
             inputVideoCD(*((VideoCD *)itemLoc));
             break;
         }
         case 5: {
-            itemLoc = new DVD;
+            itemLoc = (BaseCD *)(new DVD);
             inputDVD(*((DVD *)itemLoc));
             break;
         }
@@ -441,7 +441,7 @@ int inputBaseCD(BaseCD &item) {
 int inputAudioCD(AudioCD &item) {
     if (&item == NULL) return -2;
     
-    inputBaseCD((BaseCD &)item);
+    inputBaseCD(item);
     cout << "Artist: "; 
     cin >> item.artist;
     cout << "Duration(seconds): "; 
@@ -602,16 +602,16 @@ BaseCD ** searchByUnusedMemory(List *list, int search) {
 }
 
 int changeNeighbor(BaseCD &thisItem, BaseCD &nextItem) {
-    BaseCD *med = (BaseCD *)nextItem.next;
-    nextItem.next = &thisItem;
-    thisItem.next = med;
+    BaseCD *med = (BaseCD *)nextItem.GetNext();
+    nextItem.SetNext(&thisItem);
+    thisItem.SetNext(med);
 
-    med = (BaseCD *)thisItem.prev;
-    thisItem.prev = &nextItem;
-    nextItem.prev = med;
+    med = (BaseCD *)thisItem.GetPrev();
+    thisItem.SetPrev(&nextItem);
+    nextItem.SetPrev(med);
 
-    if (thisItem.next != NULL) thisItem.next->prev = &thisItem;
-    if (nextItem.prev != NULL) nextItem.prev->next = &nextItem;
+    if (thisItem.GetNext() != NULL) thisItem.GetNext()->SetPrev(&thisItem);
+    if (nextItem.GetPrev() != NULL) nextItem.GetPrev()->SetNext(&nextItem);
 
     return 1;
 }
@@ -623,7 +623,7 @@ bool shouldSwap(BaseCD *obj1, BaseCD *obj2, TypeSort type) {
         return obj1->title.compare(obj2->title) > 0;
     }
     case TypeSort::InuseMemory: {
-        return obj1->inuseMemory > obj2->inuseMemory 
+        return obj1->inuseMemory > obj2->inuseMemory; 
     }
     case TypeSort::Duration: {
         if (obj1->type == TypesCD::TData && obj2->type != TypesCD::TData) 
@@ -650,12 +650,12 @@ int sort(List *list, TypeSort type) {
         for (int i = 0; i < countList(list) - 1; i++) {
             BaseCD *thisItem = (BaseCD *)getPointerByIndex(list, i);
             BaseCD *nextItem = (BaseCD *)getPointerByIndex(list, i+1);
-            //If next item nearer than this than change their positions
+            //If GetNext() item nearer than this than change their positions
             if (shouldSwap(thisItem, nextItem, type)) {
                 changeNeighbor(*thisItem, *nextItem);
 
-                if (i == 0) list->head = nextItem;
-                if (i == countList(list) - 1) list->tail = thisItem;
+                if (i == 0) list->SetHead(nextItem);
+                if (i == countList(list) - 1) list->SetTail(thisItem);
             }
         }
     }
@@ -696,7 +696,7 @@ int printInformationItem(List *list, int index) {
 }
 
 void printExtendedList(List *list) {
-    if (list == NULL || list->head == NULL) {
+    if (list == NULL || list->GetHead() == NULL) {
         cout << "Empty" << endl;
         return;
     }
