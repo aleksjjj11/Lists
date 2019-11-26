@@ -12,6 +12,17 @@ List::~List() {
     this->clear();
 }
 
+ListItem * List::operator [](int index) {
+    //assert(index >= 0 && index < this->count());
+    try {
+        if (index < 0 || index >= this->count())
+            throw "Exception: array bounds";
+        return this->getPointerByIndex(index);
+    } catch (char const* e) {
+        cout << e << endl;
+    }
+}
+
 void List::setHead(ListItem *item) {
     this->head = item;
 }
@@ -135,18 +146,6 @@ int List::clear() {
     while (this->getHead()) {
         deleteItem(count()-1);
     }
-
-
-
-    /*f (list == NULL || list->getHead() == NULL) return 0;
-
-    BaseCD *med = (BaseCD *)list->getTail();
-    while (med) {
-        //todo использовать функцию deleteitem
-        BaseCD *item = (BaseCD *)med->getPrev();
-        deleteItem(list, count(list) - 1);
-        med = item;
-    }(/*/
     return 1;
 }
 

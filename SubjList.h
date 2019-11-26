@@ -1,4 +1,5 @@
 #include "list.h"
+#include <cassert>
 
 enum TypeCD {
     TData = 0,
@@ -16,15 +17,15 @@ enum TypeSort {
 
 class BaseCD : public ListItem {
 private:
-    TypeCD type;
-    std::string title = "";
-    long totalMemory = 0;
-    long inuseMemory = 0;
-    bool isAppending = false;
-    bool isRewriting = false;
+    std::string title;
+    long totalMemory;
+    long inuseMemory;
+    bool isAppending;
+    bool isRewriting;
 public:
-    TypeCD getType();
-    void setType(TypeCD typeCd);
+    BaseCD();
+    virtual void print();
+    virtual TypeCD getType() = 0;
     std::string getTitle();
     void setTitle(std::string str);
     long getTotalMemory();
@@ -35,8 +36,17 @@ public:
     void setIsAppending(bool status);
     bool getIsRewriting1();
     void setIsRewriting(bool isRewriting);
+    virtual void input();
+    bool operator <(BaseCD *item);
+    bool operator >(BaseCD *item);
+    bool operator ==(BaseCD *item);
+    bool operator ==(TypeCD type);
+    bool operator !=(TypeCD type);
 };
-class DataCD : public BaseCD {};
+class DataCD : public BaseCD {
+public:
+    TypeCD getType() override;
+};
 
 class PlayCD : public BaseCD {
 private:
@@ -44,6 +54,7 @@ private:
 public:
     long getDuration();
     void setDuration(long duration);
+    bool operator >(PlayCD *item);
 };
 
 class AudioCD : public PlayCD {
@@ -52,9 +63,15 @@ private:
 public:
     std::string getArtist();
     void setArtist(std::string name);
+    void input() final;
+    TypeCD getType() override;
+    void print() override;
 };
 
-class MP3CD : public AudioCD {};
+class MP3CD : public AudioCD {
+public:
+    TypeCD getType() override;
+};
 
 class VideoCD : public PlayCD {
 private:
@@ -62,6 +79,9 @@ private:
 public:
     std::string getDirector();
     void setDirector(std::string name);
+    void input() override;
+    TypeCD getType() override;
+    void print() override;
 };
 
 class DVD : public VideoCD {
@@ -70,16 +90,13 @@ private:
 public:
     int getNumSections();
     void setNumSections(int number);
+    void input() final;
+    TypeCD getType() override;
+    void print() override;
 };
 
 int menu(List *list);
 BaseCD *createCD(int pickType);
-int inputBaseCD(BaseCD &item);
-int inputAudioCD(AudioCD &item);
-int inputVideoCD(VideoCD &item);
-int inputDVD(DVD &item);
-int inputMP3CD(MP3CD &item);
-
 #ifndef LIST_SUBJLIST_H
 #define LIST_SUBJLIST_H
 class SubjList : public List {
@@ -90,10 +107,8 @@ public:
     BaseCD **searchByArtist(std::string search);
     BaseCD **searchByDirector(std::string search);
     BaseCD **searchByUnusedMemory(int search);
-    int printInformationItem(BaseCD *item);
-    int printInformationItem(int index);
 private:
-    int changeNeighbor(BaseCD &thisItem, BaseCD &nextItem);
-    bool shouldSwap(BaseCD *obj1, BaseCD *obj2, TypeSort type);
+    int swap(BaseCD &thisItem, BaseCD &nextItem);
+    static bool shouldSwap(BaseCD *obj1, BaseCD *obj2, TypeSort type);
 };
 #endif

@@ -35,7 +35,6 @@ int menu(List *list) {
     {
         case 0:
             exit(0);
-            break;
         case 1: {
             int chooseType = 0;
             do {
@@ -55,7 +54,7 @@ int menu(List *list) {
         case 2: {
             int count = list->count();
             cout << "Count list = " << count << endl;
-            cout << "Press any key for contien" << endl;
+            cout << "Press any key for continue" << endl;
             getchar(); getchar();
             return 1;
         }
@@ -78,13 +77,17 @@ int menu(List *list) {
             list->print();
             cout << "Enter index: ";
             cin >> indexSearch;
-            itemSearch = (BaseCD *)list->getPointerByIndex(indexSearch);
-            if (itemSearch) {
+            try {
+                itemSearch = (BaseCD *)(*list)[indexSearch];//(BaseCD *)list->getPointerByIndex(indexSearch);
+                if (itemSearch == NULL) throw "Exception: using nullpointer";
                 cout << "Found pointer: " << itemSearch << endl;
-                getchar(); getchar();
-                return 1; //Если не НУЛ, то возвращаем, что успешно
+            } catch (char const* e) {
+                cout << e << endl << "Try again" << endl;
+                return 0;
             }
-            else return 0; //Иначе, что НУЛ
+
+            getchar(); getchar();
+            return 1;
         }
         case 5: {
             int index;
@@ -92,7 +95,7 @@ int menu(List *list) {
             list->print();
             cout << "Enter index for removing: ";
             cin >> index;
-            result = (BaseCD *)list->getPointerByIndex(index);
+            result = (BaseCD *)(*list)[index];//(BaseCD *)list->getPointerByIndex(index);
             if (result == NULL) return 0;
 
             cout << "Deleted pointer - " << result << endl;
@@ -126,7 +129,7 @@ int menu(List *list) {
             }
         }
         case 8: {
-            BaseCD *itemLoc = new BaseCD;
+            ListItem *itemLoc = new ListItem();
             int position = 0;
             list->print();
             cout << "Enter position for inserting: ";
@@ -141,7 +144,7 @@ int menu(List *list) {
             return 1;
         }
         case 9: {
-            ((SubjList*)list)->printExtended();
+           ((SubjList*)list)->printExtended();
             getchar(); getchar();
             break;
         }
@@ -166,7 +169,6 @@ int menu(List *list) {
             long memorySearching;
             cout << "Enter amount of unused memory: ";
             cin >> memorySearching;
-            //функции поиска должны возвращать массив указателей
             ((SubjList *)list)->searchByUnusedMemory(memorySearching);
             getchar(); getchar();
             break;
@@ -211,7 +213,7 @@ int menu(List *list) {
             cout << "Enter index of item: ";
             int index;
             cin >> index;
-            ((SubjList *)list)->printInformationItem(index);
+            ((BaseCD *)(*list)[index])->print();//((BaseCD *)list->getPointerByIndex(index))->print();
             getchar(); getchar();
             break;
         }
@@ -222,125 +224,113 @@ int menu(List *list) {
 }
 
 BaseCD *createCD(int pickType) {
-    BaseCD *itemLoc;
     switch (pickType)
     {
         case 1: {
-            itemLoc = (BaseCD *)(new DataCD());
-            inputBaseCD(*itemLoc);
-            break;
+            DataCD *itemLoc = new DataCD();
+            itemLoc->input();
+            return itemLoc;
         }
         case 2: {
-            itemLoc = (BaseCD *)(new AudioCD());
-            inputAudioCD(*((AudioCD *)itemLoc));
-            break;
+            AudioCD *itemLoc = new AudioCD();
+            itemLoc->input();
+            return itemLoc;
         }
         case 3: {
-            itemLoc = (BaseCD *)(new MP3CD());
-            inputAudioCD(*((AudioCD *)itemLoc));
-            break;
+            MP3CD *itemLoc = new MP3CD();
+            itemLoc->input();
+            return itemLoc;
         }
         case 4: {
-            itemLoc = (BaseCD *)(new VideoCD());
-            inputVideoCD(*((VideoCD *)itemLoc));
-            break;
+            VideoCD *itemLoc = new VideoCD();
+            itemLoc->input();
+            return itemLoc;
         }
         case 5: {
-            itemLoc = (BaseCD *)(new DVD);
-            inputDVD(*((DVD *)itemLoc));
-            break;
+            DVD *itemLoc = new DVD;
+            itemLoc->input();
+            return itemLoc;
         }
         default:
-            NULL;
+            return NULL;
     }
-    return itemLoc;
 }
-//Input base information about BaseCD
-int inputBaseCD(BaseCD &item) {
-    if (&item == NULL) return -1;
 
-    string title;
+bool BaseCD::operator <(BaseCD *item) {
+    return this->inuseMemory < item->inuseMemory;
+}
+
+bool BaseCD::operator >(BaseCD *item) {
+    return this->inuseMemory > item->inuseMemory;
+}
+
+bool BaseCD::operator ==(BaseCD *item) {
+    return this->getInuseMemory() == item->getInuseMemory();
+}
+
+bool BaseCD::operator ==(TypeCD type) {
+    return this->getType() == type;
+}
+
+bool BaseCD::operator !=(TypeCD type) {
+    return this->getType() != type;
+}
+
+bool PlayCD::operator >(PlayCD *item) {
+    return this->duration > item->getDuration();
+}
+
+void BaseCD::input() {
+    //string title;
     long capacity;
     bool status;
     cout << "Title: ";
     cin >> title;
-    item.setTitle(title);
+    //this->setTitle(title);
     cout << "Total memory: ";
     cin >> capacity;
-    item.setTotalMemory(capacity);
+    this->setTotalMemory(capacity);
     cout << "Inuse memory: ";
     cin >> capacity;
-    item.setInuseMemory(capacity);
-    if (item.getInuseMemory() > item.getTotalMemory()) item.setInuseMemory(item.getTotalMemory());
+    this->setInuseMemory(capacity);
     cout << "Is appending (true[1]/false[0]): ";
     cin >> status;
-    item.setIsAppending(status);
+    this->setIsAppending(status);
     cout << "Is rewriting (true[1]/false[0]): ";
     cin >> status;
-    item.setIsRewriting(status);
-    item.setType(TData);
-    return 1;
+    this->setIsRewriting(status);
 }
 
-int inputAudioCD(AudioCD &item) {
-    if (&item == NULL) return -2;
-
-    inputBaseCD(item);
+void AudioCD::input() {
+    BaseCD::input();
     string artist;
     int duration;
     cout << "Artist: ";
     cin >> artist;
-    item.setArtist(artist);
+    this->setArtist(artist);
     cout << "Duration(seconds): ";
     cin >> duration;
-    item.setDuration(duration);
-    item.setType(TAudio);
-    return 1;
+    this->setDuration(duration);
 }
 
-int inputMP3CD(MP3CD &item) {
-    if (&item == NULL) return -2;
-
-    inputAudioCD((AudioCD &)item);
-    item.setType(TMP3);
-    return 1;
-}
-
-int inputVideoCD(VideoCD &item) {
-    if (&item == NULL) return -2;
-
-    inputBaseCD((BaseCD &)item);
+void VideoCD::input() {
+    BaseCD::input();
     string director;
     long duration;
     cout << "Director: ";
     cin >> director;
-    item.setDirector(director);
+    this->setDirector(director);
     cout << "Duration(seconds): ";
     cin >> duration;
-    item.setDuration(duration);
-    item.setType(TVideo);
-    return 1;
+    this->setDuration(duration);
 }
 
-int inputDVD(DVD &item) {
-    if (&item == NULL) return -2;
-
-    inputVideoCD((VideoCD &)item);
+void DVD::input() {
+    VideoCD::input();
     cout << "Enter amount sections: ";
     int number;
     cin >> number;
-    item.setNumSections(number);
-//    item.numSections;
-    item.setType(TDVD);
-    return 1;
-}
-
-TypeCD BaseCD::getType() {
-    return this->type;
-}
-
-void BaseCD::setType(TypeCD typeCd) {
-    this->type = typeCd;
+    this->setNumSections(number);
 }
 
 std::string BaseCD::getTitle() {
@@ -356,7 +346,7 @@ long BaseCD::getTotalMemory() {
 }
 
 void BaseCD::setTotalMemory(long capacity) {
-    (capacity < 0) ? this->totalMemory = 0 : this->totalMemory = capacity;
+    capacity < 0 ? this->totalMemory = 0 : this->totalMemory = capacity;
 }
 
 long BaseCD::getInuseMemory() {
@@ -364,7 +354,7 @@ long BaseCD::getInuseMemory() {
 }
 
 void BaseCD::setInuseMemory(long capacity) {
-    (capacity < 0) ? this->inuseMemory = 0 : this->inuseMemory = capacity;
+    capacity < 0 ? this->inuseMemory = 0 : (capacity > this->totalMemory) ? this->inuseMemory = this->totalMemory : this->inuseMemory = capacity;
 }
 
 bool BaseCD::getIsAppending() {
@@ -379,8 +369,25 @@ bool BaseCD::getIsRewriting1() {
     return this->isRewriting;
 }
 
-void BaseCD::setIsRewriting(bool isRewriting) {
-    this->isRewriting = isRewriting;
+void BaseCD::setIsRewriting(bool value) {
+    this->isRewriting = value;
+}
+
+BaseCD::BaseCD() {
+    title = "";
+    totalMemory = 0;
+    inuseMemory = 0;
+    isAppending = false;
+    isRewriting = false;
+}
+
+void BaseCD::print() {
+    printf("Title: %s\n", this->getTitle().data());
+    printf("Type: %i\n", getType());
+    printf("Total memory(mb): %li\n", getTotalMemory());
+    printf("Inuse memory(mb): %li\n", getInuseMemory());
+    printf("Is appending: %i\n", getIsAppending());
+    printf("Is rewriting: %i\n", getIsRewriting1());
 }
 
 void PlayCD::setDuration(long duration) {
@@ -399,12 +406,32 @@ void AudioCD::setArtist(std::string name) {
     this->artist = name;
 }
 
+TypeCD AudioCD::getType() {
+    return TAudio;
+}
+
+void AudioCD::print() {
+    BaseCD::print();
+    cout << "Artist: " << this->getArtist() << endl
+         << "Duration(seconds): " << this->getDuration() << endl;
+}
+
 std::string VideoCD::getDirector() {
     return this->director;
 }
 
 void VideoCD::setDirector(std::string name) {
     this->director = name;
+}
+
+TypeCD VideoCD::getType() {
+    return TVideo;
+}
+
+void VideoCD::print() {
+    BaseCD::print();
+    cout << "Artist: " << this->getDirector() << endl
+         << "Duration(seconds): " << this->getDuration() << endl;
 }
 
 int DVD::getNumSections() {
@@ -415,14 +442,25 @@ void DVD::setNumSections(int number) {
     (number < 0) ? this->numSections = 0 : this->numSections = number;
 }
 
+TypeCD DVD::getType() {
+    return TDVD;
+}
+
+void DVD::print() {
+    VideoCD::print();
+    cout << "Available sections: " << this->getNumSections() << endl;
+}
+
 void SubjList::printExtended() {
     if (this->getHead() == NULL) {
         cout << "Empty" << endl;
         return;
     }
     for (int i = 0; i < this->count(); i++) {
-        cout << "\t\t\t\tElement " << i << endl;
-        this->printInformationItem(i);
+        printf("\t\t\t\tElement %i\n", i);
+        assert((*this)[i] != NULL);
+        ((BaseCD*)((*this)[i]))->print();
+        //((BaseCD *)this->getPointerByIndex(i))->print();
     }
 }
 
@@ -432,8 +470,8 @@ BaseCD** SubjList::searchByType(TypeCD search) {
     BaseCD **arrayCD = (BaseCD **)malloc(sizeof(BaseCD *));
 
     for (int i = 0; i < this->count(); i++) {
-        BaseCD * item = (BaseCD *)this->getPointerByIndex(i);
-        if (item->getType() == search) {
+        BaseCD * item = (BaseCD *)this->getPointerByIndex(i);//(*this)[i];
+        if (*item == search) {
             if (amount == 0) {
                 arrayCD[amount] = item;
             }
@@ -457,8 +495,8 @@ BaseCD** SubjList::searchByArtist(string search) {
     BaseCD **arrayCD = (BaseCD **)malloc(sizeof(BaseCD *));
 
     for (int i = 0; i < this->count(); i++) {
-        BaseCD * item = (BaseCD *)this->getPointerByIndex(i);
-        if (item->getType() == TAudio || item->getType() == TMP3) {
+        BaseCD * item = (BaseCD*)(*this)[i];//(BaseCD *)this->getPointerByIndex(i);
+        if (*item == TAudio || *item == TMP3) {
             if (((AudioCD *)item)->getArtist() == search) {
                 if (amount == 0) {
                     arrayCD[amount] = item;
@@ -487,8 +525,8 @@ BaseCD** SubjList::searchByDirector(string search) {
     BaseCD **arrayCD = (BaseCD **)malloc(sizeof(BaseCD *));
 
     for (int i = 0; i < this->count(); i++) {
-        BaseCD * item = (BaseCD *)this->getPointerByIndex(i);
-        if (item->getType() == TVideo || item->getType() == TDVD) {
+        BaseCD * item = (BaseCD*)(*this)[i];//(BaseCD *)this->getPointerByIndex(i);
+        if (*item == TVideo || *item == TDVD) {
             if (((VideoCD *)item)->getDirector() == search) {
                 if (amount == 0) {
                     arrayCD[amount] = item;
@@ -516,7 +554,7 @@ BaseCD** SubjList::searchByUnusedMemory(int search) {
     BaseCD **arrayCD = (BaseCD **)malloc(sizeof(BaseCD *));
 
     for (int i = 0; i < this->count(); i++) {
-        BaseCD * item = (BaseCD *)this->getPointerByIndex(i);
+        BaseCD * item = (BaseCD*)(*this)[i];//(BaseCD *)this->getPointerByIndex(i);
         if (item->getTotalMemory() - item->getInuseMemory() >= search) {
             if (amount == 0) {
                 arrayCD[amount] = item;
@@ -538,37 +576,6 @@ BaseCD** SubjList::searchByUnusedMemory(int search) {
     return arrayCD;
 }
 
-int SubjList::printInformationItem(BaseCD *item) {
-    if (item == NULL) {
-        return 0;
-    }
-
-    cout << "Title: " << item->getTitle() << endl << "Type: " << item->getType() << endl
-         << "Total memory(mb): " << item->getTotalMemory() << endl
-         << "Inuse memory(mb): " << item->getInuseMemory() << endl
-         << "Is appending: " << item->getIsAppending() << endl
-         << "Is rewriting: " << item->getIsRewriting1() << endl;
-
-    if (item->getType() == TypeCD::TAudio || item->getType() == TypeCD::TMP3) {
-        cout << "Artist: " << ((AudioCD *)item)->getArtist() << endl
-             << "Duration(seconds): " << ((PlayCD *)item)->getDuration() << endl;
-        return 1;
-    }
-    if (item->getType() == TypeCD::TVideo || item->getType() == TypeCD::TDVD) {
-        cout << "Artist: " << ((AudioCD *)item)->getArtist() << endl
-             << "Duration(seconds): " << ((PlayCD *)item)->getDuration() << endl;
-    }
-    if (item->getType() == TypeCD::TDVD) {
-        cout << "Available sections: " << ((DVD *)item)->getNumSections() << endl;
-    }
-    return 1;
-}
-
-int SubjList::printInformationItem(int index) {
-    ListItem *item = this->getPointerByIndex(index);
-    return printInformationItem((BaseCD *)item);
-}
-
 bool SubjList::shouldSwap(BaseCD *obj1, BaseCD *obj2, TypeSort type) {
     switch (type)
     {
@@ -576,19 +583,16 @@ bool SubjList::shouldSwap(BaseCD *obj1, BaseCD *obj2, TypeSort type) {
             return obj1->getTitle().compare(obj2->getTitle()) > 0;
         }
         case TypeSort::InuseMemory: {
-            return obj1->getInuseMemory() > obj2->getInuseMemory();
+            return obj1 > obj2;
         }
         case TypeSort::Duration: {
-            if (obj1->getType() == TypeCD::TData && obj2->getType() != TypeCD::TData)
+            if (*obj1 == TypeCD::TData && *obj2 != TypeCD::TData)
                 return true;
 
-            if (obj1->getType() == TypeCD::TData && obj2->getType() == TypeCD::TData)
+            if (*obj1 == TypeCD::TData && *obj2 == TypeCD::TData)
                 return false;
 
-            if (((PlayCD *)obj1)->getDuration() > ((PlayCD *)obj2)->getDuration())
-                return true;
-            else
-                return false;
+            return ((PlayCD *) obj1) > ((PlayCD *) obj2);
         }
 
         default:
@@ -596,7 +600,9 @@ bool SubjList::shouldSwap(BaseCD *obj1, BaseCD *obj2, TypeSort type) {
     }
 }
 
-int SubjList::changeNeighbor(BaseCD &thisItem, BaseCD &nextItem) {
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "MemberFunctionCanBeStatic"
+int SubjList::swap(BaseCD &thisItem, BaseCD &nextItem) {
     BaseCD *med = (BaseCD *) nextItem.getNext();
     nextItem.setNext(&thisItem);
     thisItem.setNext(med);
@@ -610,15 +616,15 @@ int SubjList::changeNeighbor(BaseCD &thisItem, BaseCD &nextItem) {
 
     return 1;
 }
+#pragma clang diagnostic pop
 
 int SubjList::sort(TypeSort type) {
     for (int j = 0; j < this->count(); j++) {
         for (int i = 0; i < this->count() - 1; i++) {
-            BaseCD *thisItem = (BaseCD *)this->getPointerByIndex(i);
-            BaseCD *nextItem = (BaseCD *)this->getPointerByIndex(i+1);
-            //If getNext() item nearer than this item than change their positions
+            BaseCD *thisItem = (BaseCD*)(*this)[i];
+            BaseCD *nextItem = (BaseCD*)(*this)[i+1];
             if (shouldSwap(thisItem, nextItem, type)) {
-                changeNeighbor(*thisItem, *nextItem);
+                swap(*thisItem, *nextItem);
 
                 if (i == 0) this->setHead(nextItem);
                 if (i == this->count() - 1) this->setTail(thisItem);
@@ -627,3 +633,13 @@ int SubjList::sort(TypeSort type) {
     }
     return 0;
 }
+
+TypeCD DataCD::getType() {
+    return TData;
+}
+
+TypeCD MP3CD::getType() {
+    return TMP3;
+}
+
+//todo exception array bounds

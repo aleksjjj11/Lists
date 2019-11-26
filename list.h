@@ -34,7 +34,6 @@ public:
     ~List();
     void setHead(ListItem *item = NULL);
     void setTail(ListItem *item = NULL);
-
     int addItem(ListItem *item);
     void print();
     int count();
@@ -44,5 +43,7 @@ public:
     ListItem* removeItem(int index);
     int clear();
     int insertItem(ListItem *item, int index);
+
+    virtual ListItem *operator [](int index);
 };
 #endif
