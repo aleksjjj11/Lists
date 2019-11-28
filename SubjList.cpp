@@ -488,7 +488,7 @@ BaseCD** SubjList::searchByType(TypeCD search) {
     BaseCD **arrayCD = (BaseCD **)malloc(sizeof(BaseCD *));
 
     for (int i = 0; i < this->count(); i++) {
-        BaseCD * item; //= (BaseCD *)(*this)[i];//this->getPointerByIndex(i);
+        BaseCD * item;
         try {
             item = (BaseCD *)(*this)[i];
             if (item == NULL) throw "Exception: using nullpointer";
@@ -521,7 +521,15 @@ BaseCD** SubjList::searchByArtist(string search) {
     BaseCD **arrayCD = (BaseCD **)malloc(sizeof(BaseCD *));
 
     for (int i = 0; i < this->count(); i++) {
-        BaseCD * item = (BaseCD*)(*this)[i];//(BaseCD *)this->getPointerByIndex(i);
+        BaseCD * item;
+        try {
+            item = (BaseCD *)(*this)[i];
+            if (item == NULL) throw "Exception: using nullpointer";
+        } catch (char const* e) {
+            cout << e << endl << "Try again" << endl;
+            getchar(); getchar();
+            return 0;
+        }
         if (*item == TAudio || *item == TMP3) {
             if (((AudioCD *)item)->getArtist() == search) {
                 if (amount == 0) {
