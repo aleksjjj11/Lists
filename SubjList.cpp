@@ -225,8 +225,17 @@ int menu(List *list) {
             cout << "Enter index of item: ";
             int index;
             cin >> index;
-            if ((BaseCD *)(*list)[index])
-                ((BaseCD *)(*list)[index])->print();
+            BaseCD *result;
+            try {
+                result = (BaseCD *)(*list)[index];
+                if (result == NULL) throw "Exception: using nullpointer";
+            } catch (char const* e) {
+                cout << e << endl << "Try again" << endl;
+                getchar(); getchar();
+                return 0;
+            }
+
+            result->print();
             getchar(); getchar();
             break;
         }
