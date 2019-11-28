@@ -303,12 +303,10 @@ bool PlayCD::operator >(PlayCD *item) {
 }
 
 void BaseCD::input() {
-    //string title;
     long capacity;
     bool status;
     cout << "Title: ";
     cin >> title;
-    //this->setTitle(title);
     cout << "Total memory: ";
     cin >> capacity;
     this->setTotalMemory(capacity);
@@ -480,9 +478,7 @@ void SubjList::printExtended() {
     }
     for (int i = 0; i < this->count(); i++) {
         printf("\t\t\t\tElement %i\n", i);
-        assert((*this)[i] != NULL);
         ((BaseCD*)((*this)[i]))->print();
-        //((BaseCD *)this->getPointerByIndex(i))->print();
     }
 }
 
@@ -492,7 +488,15 @@ BaseCD** SubjList::searchByType(TypeCD search) {
     BaseCD **arrayCD = (BaseCD **)malloc(sizeof(BaseCD *));
 
     for (int i = 0; i < this->count(); i++) {
-        BaseCD * item = (BaseCD *)this->getPointerByIndex(i);//(*this)[i];
+        BaseCD * item; //= (BaseCD *)(*this)[i];//this->getPointerByIndex(i);
+        try {
+            item = (BaseCD *)(*this)[i];
+            if (item == NULL) throw "Exception: using nullpointer";
+        } catch (char const* e) {
+            cout << e << endl << "Try again" << endl;
+            getchar(); getchar();
+            return 0;
+        }
         if (*item == search) {
             if (amount == 0) {
                 arrayCD[amount] = item;
