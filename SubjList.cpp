@@ -83,6 +83,7 @@ int menu(List *list) {
                 cout << "Found pointer: " << itemSearch << endl;
             } catch (char const* e) {
                 cout << e << endl << "Try again" << endl;
+                getchar(); getchar();
                 return 0;
             }
 
@@ -95,8 +96,14 @@ int menu(List *list) {
             list->print();
             cout << "Enter index for removing: ";
             cin >> index;
-            result = (BaseCD *)(*list)[index];//(BaseCD *)list->getPointerByIndex(index);
-            if (result == NULL) return 0;
+            try {
+                result = (BaseCD *)(*list)[index];
+                if (result == NULL) throw "Exception: using nullpointer";
+            } catch (char const* e) {
+                cout << e << endl << "Try again" << endl;
+                getchar(); getchar();
+                return 0;
+            }
 
             cout << "Deleted pointer - " << result << endl;
             list->deleteItem(index);
@@ -160,7 +167,6 @@ int menu(List *list) {
             string artist;
             cout << "Enter artist: ";
             cin >> artist;
-            //Есть возможность использовать все найденные элементы, так как функция возвращает массив указателей
             ((SubjList *)list)->searchByArtist(artist);
             getchar(); getchar();
             break;
@@ -213,7 +219,8 @@ int menu(List *list) {
             cout << "Enter index of item: ";
             int index;
             cin >> index;
-            ((BaseCD *)(*list)[index])->print();//((BaseCD *)list->getPointerByIndex(index))->print();
+            if ((BaseCD *)(*list)[index])
+                ((BaseCD *)(*list)[index])->print();
             getchar(); getchar();
             break;
         }
